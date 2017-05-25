@@ -8,6 +8,8 @@ Currently targets .Net Standard v1.4
 ### Authorization
 Get an OAuth Token using the Authorization Code Flow
 ```
+using DotNetStandardSpotifyWebApi.Authorization;
+
 //Sets up a redirect to Spotify, which will send an OAUTH_CODE to the given REDIRECT_URI
  AuthorizationInProgress flow = AuthorizationCodeFlow.GetAuthStateAndRedirect(<CLIENT_ID>, <REDIRECT_URI>, <SCOPE>);
 
@@ -25,6 +27,8 @@ Refresh the OAuth Access Token
 ### Spotify Objects
 Get the current spotify user
 ```
+using DotNetStandardSpotifyWebApi.ObjectModel;
+
 User currentUser = await User.GetCurrentUser(<ACCESS_TOKEN>);
 ```
 
