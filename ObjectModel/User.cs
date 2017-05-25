@@ -13,18 +13,18 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         private const string api_CurrentProfile = baseUrl + "/v1/me";
         private const string api_FollowedArtists = baseUrl + "/v1/me/following";
         private const string api_FollowingArtistsContains = baseUrl + "/v1/me/following/contains";
-        private const string api_FollowPlaylist = baseUrl + "/v1/users/{owner_id}/playlists/{playlist_id}/followers";
-        private const string api_SaveTracksToLibrary = baseUrl + "/v1/me/tracks?ids={ids}";
+        private const string api_FollowPlaylist = baseUrl + "/v1/users/{0}/playlists/{1}/followers";
+        private const string api_SaveTracksToLibrary = baseUrl + "/v1/me/tracks?ids={0}";
         private const string api_GetSavedTracks = baseUrl + "/v1/me/tracks";
-        private const string api_CheckSavedTracks = baseUrl + "/v1/me/tracks/contains?ids={ids}";
-        private const string api_SaveAlbums = baseUrl + "/v1/me/albums?ids={ids}";
+        private const string api_CheckSavedTracks = baseUrl + "/v1/me/tracks/contains?ids={0}";
+        private const string api_SaveAlbums = baseUrl + "/v1/me/albums?ids={0}";
         private const string api_GetSavedAlbums = baseUrl + "/v1/me/albums";
-        private const string api_CheckSavedAlbums = baseUrl + "/v1/me/albums/contains?ids={ids}";
-        private const string api_GetTop = baseUrl + "/v1/me/top/{type}"; //either 'artists' or 'tracks'
-        private const string api_GetPublicProfile = baseUrl + "/v1/users/{user_id}";
-        private const string api_GetPublicPlaylists = baseUrl + "/v1/users/{user_id}/playlists";
+        private const string api_CheckSavedAlbums = baseUrl + "/v1/me/albums/contains?ids={0}";
+        private const string api_GetTop = baseUrl + "/v1/me/top/{0}"; //either 'artists' or 'tracks'
+        private const string api_GetPublicProfile = baseUrl + "/v1/users/{0}";
+        private const string api_GetPublicPlaylists = baseUrl + "/v1/users/{0}/playlists";
         private const string api_GetPlaylists = baseUrl + "/v1/me/playlists";
-        private const string api_CheckUserFollowsPlaylist = baseUrl + "/v1/users/{user_id}/playlists/{playlist_id}/followers/contains";
+        private const string api_CheckUserFollowsPlaylist = baseUrl + "/v1/users/{0}/playlists/{1}/followers/contains";
         private const string api_GetRecentlyPlayedTracks = baseUrl + "v1/me/player/recently-played";
 
         /// <summary>
@@ -126,8 +126,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             return user;
         }
 
-        public static async Task<User> GetUser(string accessToken) {
-            HttpRequestMessage message = WebRequestHelpers.SetupRequest(api_GetPublicProfile, accessToken);
+        public static async Task<User> GetUser(string user_id, string accessToken) {
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(string.Format(api_GetPublicProfile, user_id), accessToken);
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
 
             User user;
