@@ -8,6 +8,11 @@ using Newtonsoft.Json.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
+    /// <summary>
+    /// User representing both the Full and Simplified User Objects
+    /// https://developer.spotify.com/web-api/object-model/#user-object-public
+    /// https://developer.spotify.com/web-api/object-model/#user-object-private
+    /// </summary>
     public class User : SpotifyObjectModel{
 
         private const string api_CurrentProfile = baseUrl + "/v1/me";
