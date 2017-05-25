@@ -16,9 +16,10 @@ using DotNetStandardSpotifyWebApi.Authorization;
 //Exchanges an OAuth code from a successful Spotify redirect for a OAuth Credentials
  OAuthCredentials token = await AuthorizationCodeFlow.GetSpotifyTokenCredentials(<OAUTH_CODE>, <CLIENT_ID>, <CLIENT_SECRET>, <REDIRECT_URI>);
  
- //Refresh the OAuth Access Token
- //Refresh with a previously received OAuthCredentials
+
+//Refresh token with a previously received OAuthCredentials
  OAuthCredentials token = await AuthorizationCodeFlow.RefreshAccessToken(<OAUTHCREDENTIALS>, <CLIENT_ID>, <CLIENT_SECRET>);
+ 
 //Or refresh with just a refresh token
  OAuthCredentials token = await AuthorizationCodeFlow.RefreshAccessToken(<REFRESH_TOKEN>, <CLIENT_ID>, <CLIENT_SECRET>);
 ```
