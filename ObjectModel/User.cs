@@ -157,40 +157,40 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
     }
 
     public class Album : SpotifyObjectModel {
-        private const string api_GetAlbum = baseUrl + "/v1/albums/{id}";
-        private const string api_GetAlbums = baseUrl + "/v1/albums?ids={ids}";
-        private const string api_GetAlbumsTracks = baseUrl + "/v1/albums/{id}/tracks";
+        private const string api_GetAlbum = baseUrl + "/v1/albums/{0}";
+        private const string api_GetAlbums = baseUrl + "/v1/albums?ids={0}";
+        private const string api_GetAlbumsTracks = baseUrl + "/v1/albums/{0}/tracks";
     }
 
     public class Artist : SpotifyObjectModel {
-        private const string api_GetArtist = baseUrl + "/v1/artists/{id}";
-        private const string api_GetArtists = baseUrl + "/v1/artists?ids={ids}";
-        private const string api_GetArtistsAlbums = baseUrl + "/v1/artists/{id}/albums";
-        private const string api_GetArtistsTopTracks = baseUrl + "/v1/artists/{id}/top-tracks";
-        private const string api_GetRelatedArtists = baseUrl + "/v1/artists/{id}/related-artists";
+        private const string api_GetArtist = baseUrl + "/v1/artists/{0}";
+        private const string api_GetArtists = baseUrl + "/v1/artists?ids={0}";
+        private const string api_GetArtistsAlbums = baseUrl + "/v1/artists/{0}/albums";
+        private const string api_GetArtistsTopTracks = baseUrl + "/v1/artists/{0}/top-tracks";
+        private const string api_GetRelatedArtists = baseUrl + "/v1/artists/{0}/related-artists";
     }
 
     public class Track : SpotifyObjectModel {
-        private const string api_GetTrack = baseUrl + "/v1/tracks/{id}";
-        private const string api_GetTracks = baseUrl + "/v1/tracks?ids={ids}";
+        private const string api_GetTrack = baseUrl + "/v1/tracks/{0}";
+        private const string api_GetTracks = baseUrl + "/v1/tracks?ids={0}";
 
     }
 
     public class AudioAnalysis : SpotifyObjectModel {
-        private const string api_GetAudioAnalysis = baseUrl + "/v1/audio-analysis/{id}";
+        private const string api_GetAudioAnalysis = baseUrl + "/v1/audio-analysis/{0}";
     }
 
     public class AudioFeatures : SpotifyObjectModel {
-        private const string api_GetAudioFeature = baseUrl + "/v1/audio-features/{id}";
-        private const string api_GetAudioFeatures = baseUrl + "/v1/audio-features?ids={ids}";
+        private const string api_GetAudioFeature = baseUrl + "/v1/audio-features/{0}";
+        private const string api_GetAudioFeatures = baseUrl + "/v1/audio-features?ids={0}";
     }
 
     public class Browse : SpotifyObjectModel {
         private const string api_GetFeaturedPlaylsits = baseUrl + "/v1/browse/featured-playlists";
         private const string api_GetNewReleases = baseUrl + "/v1/browse/new-releases";
         private const string api_GetCategories = baseUrl + "/v1/browse/categories";
-        private const string api_GetCategory = baseUrl + "/v1/browse/categories/{id}";
-        private const string api_GetCategoryPlaylists = baseUrl + "/vi/browse/categories/{id}/playlists";
+        private const string api_GetCategory = baseUrl + "/v1/browse/categories/{0}";
+        private const string api_GetCategoryPlaylists = baseUrl + "/vi/browse/categories/{0}/playlists";
     }
 
     public class Recommendation : SpotifyObjectModel {
@@ -205,9 +205,9 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
     }
 
     public class Playlist : SpotifyObjectModel {
-        private const string api_GetPlaylist = baseUrl + "/v1/users/{user_id}/playlists/{playlist_id}";
-        private const string api_GetPlaylistsTracks = baseUrl + "/v1/users/{user_id}/playlists/{playlist_id}/tracks";
-        private const string api_CreatePlaylist = baseUrl + "/v1/users/{user_id}/playlists";
+        private const string api_GetPlaylist = baseUrl + "/v1/users/{0}/playlists/{1}";
+        private const string api_GetPlaylistsTracks = baseUrl + "/v1/users/{0}/playlists/{1}/tracks";
+        private const string api_CreatePlaylist = baseUrl + "/v1/users/{0}/playlists";
     }
 
     public class Playback : SpotifyObjectModel {
