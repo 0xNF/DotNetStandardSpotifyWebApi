@@ -15,17 +15,15 @@ using DotNetStandardSpotifyWebApi.Authorization;
 
 //Exchanges an OAuth code from a successful Spotify redirect for a OAuth Credentials
  OAuthCredentials token = await AuthorizationCodeFlow.GetSpotifyTokenCredentials(<OAUTH_CODE>, <CLIENT_ID>, <CLIENT_SECRET>, <REDIRECT_URI>);
-```
-
-Refresh the OAuth Access Token
-```
+ 
+ //Refresh the OAuth Access Token
  OAuthCredentials token = await AuthorizationCodeFlow.RefreshAccessToken(<OAUTHCREDENTIALS>, <CLIENT_ID>, <CLIENT_SECRET>);
- //OR
+        //OR
  OAuthCredentials token = await AuthorizationCodeFlow.RefreshAccessToken(<REFRESH_TOKEN>, <CLIENT_ID>, <CLIENT_SECRET>);
 ```
 
 ### Spotify Objects
-Get the current spotify user
+User
 ```
 using DotNetStandardSpotifyWebApi.ObjectModel;
 
