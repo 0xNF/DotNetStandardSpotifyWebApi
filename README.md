@@ -19,7 +19,7 @@ using DotNetStandardSpotifyWebApi.Authorization;
 
 //Refresh token with a previously received OAuthCredentials
  OAuthCredentials token = await AuthorizationCodeFlow.RefreshAccessToken(<OAUTHCREDENTIALS>, <CLIENT_ID>, <CLIENT_SECRET>);
- 
+
 //Or refresh with just a refresh token
  OAuthCredentials token = await AuthorizationCodeFlow.RefreshAccessToken(<REFRESH_TOKEN>, <CLIENT_ID>, <CLIENT_SECRET>);
 ```
@@ -29,10 +29,12 @@ User
 ```
 using DotNetStandardSpotifyWebApi.ObjectModel;
 
-//Get the currently Spotify User
+//Get the current Spotify User
+//Returns a User object with a more complete profile
 User currentUser = await User.GetCurrentUser(<ACCESS_TOKEN>);
 
 //Get an arbitrary Spotify user
+//Returns a User object with only publically available information
 User someUser = await User.GetUser(<USER_ID>, <ACCESS_TOKEN>);
 ```
 
