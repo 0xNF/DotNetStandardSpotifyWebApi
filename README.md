@@ -29,12 +29,12 @@ Get the current spotify user
 ```
 using DotNetStandardSpotifyWebApi.ObjectModel;
 
+//Get the currently Spotify User
 User currentUser = await User.GetCurrentUser(<ACCESS_TOKEN>);
-```
 
-Get an arbitrary user
-```
+//Get an arbitrary Spotify user
 User someUser = await User.GetUser(<USER_ID>, <ACCESS_TOKEN>);
 ```
+
 
 
