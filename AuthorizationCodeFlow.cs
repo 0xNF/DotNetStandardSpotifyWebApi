@@ -50,10 +50,16 @@ namespace DotNetStandardSpotifyWebApi {
             return new AuthorizationInProgress(stateValue, redirect);
         }
 
-        //Returns a SpotifyOAuthCredentials. On success, returns with an access token, a refresh token, and a timer limit for the validity of the access token. (Refresh has no expiry). Sets WasSuccessful to True
-        //On error, returns with the error code and message, and the other fields are null. Also sets WasSuccess to false.
+        /// <summary>
+        /// Returns a SpotifyOAuthCredentials. On success, returns with an access token, a refresh token, and a timer limit for the validity of the access token. (Refresh has no expiry). Sets WasSuccessful to True
+        /// On error, returns with the error code and message, and the other fields are null. Also sets WasSuccess to false.
+        /// </summary>
+        /// <param name="OAuthToken"></param>
+        /// <param name="clientId"></param>
+        /// <param name="clientSecret"></param>
+        /// <param name="redirectUri"></param>
+        /// <returns></returns>
         public static async Task<OAuthCredentials> GetSpotifyTokenCredentials(string OAuthToken, string clientId, string clientSecret, string redirectUri){
-            //Uses System.Net; System.Net.Http; System.Net.Http.Headers;
             string postBody = $"code={OAuthToken}&redirect_uri={redirectUri}&grant_type=authorization_code";
             return await GetSpotifyCredentials(postBody, clientId, clientSecret);        
         }

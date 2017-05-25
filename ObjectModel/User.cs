@@ -6,13 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace DotNetStandardSpotifyWebApi{
-
-    public abstract class SpotifyObjectModel {
-        internal const string baseUrl = "https://api.spotify.com";
-        internal bool WasError { get; set; } = false;
-        internal string ErrorMessage { get; set; } = string.Empty;
-    }
+namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
     public class User : SpotifyObjectModel{
 
@@ -58,10 +52,15 @@ namespace DotNetStandardSpotifyWebApi{
         /// </summary>
         public string Email { get; private set; } = string.Empty;
 
-        //TODO - Followers
-        public string Followers { get; private set; } = string.Empty;
-        //TODO - ExternalURLS
-        public string External_urls { get; private set; } = string.Empty;
+        /// <summary>
+        /// Information about the followers of the user. 
+        /// </summary>
+        public Followers Followers { get; private set; }
+
+        /// <summary>
+        /// Known external URLs for this user.
+        /// </summary>
+        public ExternalUrl[] External_urls { get; private set; }
 
         /// <summary>
         /// A link to the Web API endpoint for this user.
@@ -88,7 +87,7 @@ namespace DotNetStandardSpotifyWebApi{
         /// <summary>
         /// The object type: "user" 
         /// </summary>
-        public string Type { get; private set; } = "user";
+        public string Type { get; } = "user";
 
         /// <summary>
         /// The Spotify URI for the user.
@@ -103,14 +102,13 @@ namespace DotNetStandardSpotifyWebApi{
             User user;
             if (response.IsSuccessStatusCode) {
                 JToken j = await WebRequestHelpers.ParseJsonResponse(response.Content);
-                // string TEST = j.Value<string>("id") ?? string.Empty;
                 user = new User {
                     Birthdate = j.Value<string>("birthdate") ?? string.Empty,
                     Country = j.Value<string>("country") ?? string.Empty,
                     DisplayName = j.Value<string>("display_name") ?? string.Empty,
                     Email = j.Value<string>("email") ?? string.Empty,
-                    // External_urls = j.Value<string>("external_urls") ?? string.Empty,  //TODO external_urls
-                    // Followers = j.Value<string>("followers") ?? string.Empty,           //TODO - followers
+                    External_urls = ExternalUrl.FromToken(j.Value<JObject>("external_urls")),
+                    Followers = new Followers(j.Value<JToken>("followers")) ?? null,
                     // Images = j.Value<string>("images") ?? string.Empty,
                     Product = j.Value<string>("product") ?? string.Empty,
 
@@ -137,8 +135,9 @@ namespace DotNetStandardSpotifyWebApi{
                 JToken j = await WebRequestHelpers.ParseJsonResponse(response.Content);
                 user = new User {
                     DisplayName = j.Value<string>("display_name") ?? string.Empty,
-                    External_urls = j.Value<string>("external_urls") ?? string.Empty,  //TODO external_urls
-                    Followers = j.Value<string>("followers") ?? string.Empty,           //TODO - followers
+
+                    External_urls = ExternalUrl.FromToken(j.Value<JObject>("external_urls")),
+                    Followers = new Followers(j.Value<JToken>("followers")) ?? null,
                     Images = j.Value<string>("images") ?? string.Empty,
 
                     Href = j.Value<string>("href") ?? string.Empty,
