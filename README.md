@@ -17,8 +17,9 @@ using DotNetStandardSpotifyWebApi.Authorization;
  OAuthCredentials token = await AuthorizationCodeFlow.GetSpotifyTokenCredentials(<OAUTH_CODE>, <CLIENT_ID>, <CLIENT_SECRET>, <REDIRECT_URI>);
  
  //Refresh the OAuth Access Token
+ //Refresh with a previously received OAuthCredentials
  OAuthCredentials token = await AuthorizationCodeFlow.RefreshAccessToken(<OAUTHCREDENTIALS>, <CLIENT_ID>, <CLIENT_SECRET>);
-        //OR
+//Or refresh with just a refresh token
  OAuthCredentials token = await AuthorizationCodeFlow.RefreshAccessToken(<REFRESH_TOKEN>, <CLIENT_ID>, <CLIENT_SECRET>);
 ```
 
