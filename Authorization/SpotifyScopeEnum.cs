@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DotNetStandardSpotifyWebApi {
+namespace DotNetStandardSpotifyWebApi.Authorization {
     public sealed class SpotifyScopeEnum { 
 
         public int Value { get; }

@@ -13,7 +13,7 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using DotNetStandardSpotifyWebApi.Helpers;
 
-namespace DotNetStandardSpotifyWebApi {
+namespace DotNetStandardSpotifyWebApi.Authorization {
 
     public static class AuthorizationCodeFlow {
 
