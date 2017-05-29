@@ -52,6 +52,11 @@ Playlist pl = await Playlist.GetPlaylist(<USER_ID>, <PLAYLIST_ID>, <ACCESS_TOKEN
 //Returns a paging object
 Paging<ISpotifyObject> page = await Playlist.GetPublicPlaylists(<USER_ID>, <ACCESS_TOKEN>);
 //page.Items contains the individual playlists
+
+//Get current users public and private playlists
+//Returns a paging object
+User me = User.GetCurrentUser(<ACCESS_TOKEN>);
+Paging<ISpotifyObject> page = await me.GetCurrentUserPlaylists(<ACCESS_TOKEN>);
 ```
 
 
