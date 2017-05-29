@@ -79,7 +79,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
         /// <summary>
         /// The popularity of the track. The value will be between 0 and 100, with 100 being the most popular.
-        ///  The popularity of a track is a value between 0 and 100, with 100 being the most popular. 
         ///  The popularity is calculated by algorithm and is based, in the most part, on the total number of plays the track has had and how recent those plays are.
         ///  Generally speaking, songs that are being played a lot now will have a higher popularity than songs that were played a lot in the past. 
         ///  Duplicate tracks (e.g. the same track from a single and an album) are rated independently. 
@@ -131,7 +130,9 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             /*Complex Fields */
             /* Available Markets */
             JArray markets = token.Value<JArray>("available_markets");
-            this.Available_Markets = markets.Values<string>().ToArray();
+            if (markets != null) {
+                this.Available_Markets = markets.Values<string>().ToArray();
+            }
 
             /* Album */
             JObject album = token.Value<JObject>("album");
