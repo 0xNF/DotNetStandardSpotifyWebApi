@@ -38,5 +38,15 @@ User currentUser = await User.GetCurrentUser(<ACCESS_TOKEN>);
 User someUser = await User.GetUser(<USER_ID>, <ACCESS_TOKEN>);
 ```
 
+Playlists
+
+```
+using DotNetStandardSpotifyWebApi.ObjectModel;
+
+//Get an arbitrary Spotify playlist belonging to some user
+//Returns a full playlist object
+Playlist pl = await Playlist.GetPlaylist(<USER_ID>, <PLAYLIST_ID>, <ACCESS_TOKEN>);
+```
+
 
 
