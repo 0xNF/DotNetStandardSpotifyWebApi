@@ -199,11 +199,26 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             return user;
         }
 
-        //TODO 
-        //Gets the current users public and private playlists
-        public async Task<List<Playlist>> GetPlaylists(string accessToken) {
-            await Task.Delay(1); //TODO remove me
-            return new List<Playlist>();
+
+        /// <summary>
+        /// Returns a Paging object of the current users public and private playlists
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <returns></returns>
+        public async Task<Paging<ISpotifyObject>> GetCurrentUserPlaylists(string accessToken) {
+            int limit = 50;
+            int offset = 0;
+            string req = string.Format(api_GetPlaylists, limit, offset);
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(req, accessToken);
+            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
+                Paging<ISpotifyObject> paging = Paging<Playlist>.MakePlaylistPaging(token);
+                return paging;
+            }
+            else {
+                return null;
+            }
         }
 
     }
