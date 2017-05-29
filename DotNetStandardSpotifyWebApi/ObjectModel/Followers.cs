@@ -35,5 +35,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             this.Total = token.Value<int?>("total") ?? -1;
             this.Href = token.Value<string>("href") ?? string.Empty;
         }
+
+        public Followers(bool wasError, string errorMessage) {
+            this.WasError = wasError;
+            this.ErrorMessage = errorMessage;
+        }
     }
 }

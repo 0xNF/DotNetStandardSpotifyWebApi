@@ -86,7 +86,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// A collection containing a link (href) to the Web API endpoint where full details of the playlist's tracks can be retrieved, along with the total number of tracks in the playlist.
         /// </summary>
-        public Track[] Tracks { get; } = new Track[0];
+        public PlaylistTrack[] Tracks { get; } = new PlaylistTrack[0];
 
         /// <summary>
         /// The object type: "playlist"
