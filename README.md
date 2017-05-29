@@ -63,7 +63,7 @@ Playlist success = await me.CreatePlaylist(<PLAYLIST_NAME>, <IS_PUBLIC>, <IS_COL
 
 //Add tracks to playlist
 IEnumerable<string> trackuris = new List<string>(){"spotify:track:2ugCxRuCK5KP0v7SlJS31S", "spotify:track:704WGXkmn0dWLuNsgmEUeE"};
-string snapshotId = await Playlist.AddTracks(me.Id, success.Id, trackuris, 0, creds.Access_token);
+string snapshotId = await Playlist.AddTracks(<USER_ID>, <PLAYLIST_ID>, trackuris, <POSITION>, <ACCESS_TOKEN>);
 
 ```
 
