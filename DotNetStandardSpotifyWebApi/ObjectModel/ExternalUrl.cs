@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
-    public class ExternalUrl : SpotifyObjectModel {
+    public class ExternalUrl : SpotifyObjectModel, ISpotifyObject {
         
         /// <summary>
         /// The type of the URL, for example: "spotify"
