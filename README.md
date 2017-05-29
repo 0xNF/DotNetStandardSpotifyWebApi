@@ -47,7 +47,6 @@ using DotNetStandardSpotifyWebApi.ObjectModel;
 //Returns a full playlist object
 Playlist pl = await Playlist.GetPlaylist(<USER_ID>, <PLAYLIST_ID>, <ACCESS_TOKEN>);
 
-
 //Get a users public playlists
 //Returns a paging object
 Paging<ISpotifyObject> page = await Playlist.GetPublicPlaylists(<USER_ID>, <ACCESS_TOKEN>);
@@ -61,6 +60,10 @@ Paging<ISpotifyObject> page = await me.GetCurrentUserPlaylists(<ACCESS_TOKEN>);
 //Create a playlist
 //Returns a playlist object representing the newly created playlist
 Playlist success = await me.CreatePlaylist(<PLAYLIST_NAME>, <IS_PUBLIC>, <IS_COLLABORATIVE>, <DESCRIPTION>, <ACCESS_TOKEN>);
+
+//Add tracks to playlist
+IEnumerable<string> trackuris = new List<string>(){"spotify:track:2ugCxRuCK5KP0v7SlJS31S", "spotify:track:704WGXkmn0dWLuNsgmEUeE"};
+string snapshotId = await Playlist.AddTracks(me.Id, success.Id, trackuris, 0, creds.Access_token);
 
 ```
 
