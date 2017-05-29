@@ -57,6 +57,11 @@ Paging<ISpotifyObject> page = await Playlist.GetPublicPlaylists(<USER_ID>, <ACCE
 //Returns a paging object
 User me = User.GetCurrentUser(<ACCESS_TOKEN>);
 Paging<ISpotifyObject> page = await me.GetCurrentUserPlaylists(<ACCESS_TOKEN>);
+
+//Create a playlist
+//Returns a playlist object representing the newly created playlist
+Playlist success = await me.CreatePlaylist(<PLAYLIST_NAME>, <IS_PUBLIC>, <IS_COLLABORATIVE>, <DESCRIPTION>, <ACCESS_TOKEN>);
+
 ```
 
 
