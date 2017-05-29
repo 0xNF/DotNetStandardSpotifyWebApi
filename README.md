@@ -46,7 +46,14 @@ using DotNetStandardSpotifyWebApi.ObjectModel;
 //Get an arbitrary Spotify playlist belonging to some user
 //Returns a full playlist object
 Playlist pl = await Playlist.GetPlaylist(<USER_ID>, <PLAYLIST_ID>, <ACCESS_TOKEN>);
+
+
+//Get a users public playlists
+//Returns a paging object
+Paging<ISpotifyObject> page = await Playlist.GetPublicPlaylists(<USER_ID>, <ACCESS_TOKEN>);
+//page.Items contains the individual playlists
 ```
+
 
 
 
