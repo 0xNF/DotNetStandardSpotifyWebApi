@@ -30,12 +30,12 @@ namespace DotNetStandardSpotifyWebApi.Helpers
         /// <summary>
         /// True if the server response was an error
         /// </summary>
-        public bool WasError { get; } = true;
+        public bool WasError { get; private set; } = true;
 
         /// <summary>
         /// Error class - use if the server returned invalid credentials
         /// </summary>
-        public static OAuthCredentials CrendentialError { get; } = new OAuthCredentials("Error", "Error", -1, "Error");
+        public static OAuthCredentials CrendentialError { get; } = new OAuthCredentials("Error", "Error", -1, "Error") { WasError = true };
 
         public OAuthCredentials(string userid, string token, int expires, string refresh) {
             this.UserId = userid;

@@ -9,7 +9,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
     /// <summary>
     /// Information about the followers of the user. 
     /// </summary>
-    public class Followers{
+    public class Followers : SpotifyObjectModel{
         /// <summary>
         /// A link to the Web API endpoint providing full details of the followers; null if not available. 
         /// Please note that this will always be set to null, as the Web API does not support it at the moment.
@@ -21,6 +21,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         /// </summary>
         public int Total { get; } = 0;
 
+
         public Followers(string href, int total) {
             this.Href = href;
             this.Total = total;
@@ -31,7 +32,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         }
 
         public Followers(JToken token) {
-            this.Total = token.Value<int>("total");
+            this.Total = token.Value<int?>("total") ?? -1;
             this.Href = token.Value<string>("href") ?? string.Empty;
         }
     }
