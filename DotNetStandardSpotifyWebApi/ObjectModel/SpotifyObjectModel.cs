@@ -11,5 +11,15 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         internal const string baseUrl = "https://api.spotify.com";
         public bool WasError { get; set; } = false;
         public string ErrorMessage { get; set; } = string.Empty;
+
+        //public SpotifyObjectModel(bool wasError, string errorMessage) {
+        //    this.WasError = wasError;
+        //    this.ErrorMessage = errorMessage;
+        //}
+
+    }
+
+    public interface ISpotifyObject {
+
     }
 }
