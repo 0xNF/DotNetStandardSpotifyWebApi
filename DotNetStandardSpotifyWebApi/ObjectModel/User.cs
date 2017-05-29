@@ -65,7 +65,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// Known external URLs for this user.
         /// </summary>
-        public ExternalUrl[] External_urls { get; } = new ExternalUrl[0];
+        public External_Url[] External_urls { get; } = new External_Url[0];
 
         /// <summary>
         /// A link to the Web API endpoint for this user.
@@ -117,7 +117,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             /* External Urls*/
             JObject exturls = token.Value<JObject>("external_urls");
             if(exturls != null) {
-                ExternalUrl.FromToken(token.Value<JObject>("external_urls"));
+                External_Url.FromJObject(token.Value<JObject>("external_urls"));
             }
 
             /* Followers */
@@ -255,8 +255,29 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         private const string api_GetAlbums = baseUrl + "/v1/albums?ids={0}";
         private const string api_GetAlbumsTracks = baseUrl + "/v1/albums/{0}/tracks";
 
+        /// <summary>
+        /// JToken constructor
+        /// </summary>
+        /// <param name="token"></param>
         public Album(JToken token) {
 
+        }
+
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
+        public Album() {
+
+        }
+
+        /// <summary>
+        /// Error constructor
+        /// </summary>
+        /// <param name="wasError"></param>
+        /// <param name="errorMessage"></param>
+        public Album(bool wasError, string errorMessage) {
+            this.WasError = wasError;
+            this.ErrorMessage = errorMessage;
         }
     }
 
@@ -267,17 +288,29 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         private const string api_GetArtistsTopTracks = baseUrl + "/v1/artists/{0}/top-tracks";
         private const string api_GetRelatedArtists = baseUrl + "/v1/artists/{0}/related-artists";
 
+        /// <summary>
+        /// JToken Constructor
+        /// </summary>
+        /// <param name="token"></param>
         public Artist(JToken token) {
 
         }
-    }
 
-    public class Track : SpotifyObjectModel, ISpotifyObject {
-        private const string api_GetTrack = baseUrl + "/v1/tracks/{0}";
-        private const string api_GetTracks = baseUrl + "/v1/tracks?ids={0}";
+        /// <summary>
+        /// Empty Constructor
+        /// </summary>
+        public Artist() {
 
-        public Track(JToken token) {
+        }
 
+        /// <summary>
+        /// Error constructor
+        /// </summary>
+        /// <param name="wasError"></param>
+        /// <param name="errorMessage"></param>
+        public Artist(bool wasError, string errorMessage) {
+            this.WasError = wasError;
+            this.ErrorMessage = errorMessage;
         }
     }
 
