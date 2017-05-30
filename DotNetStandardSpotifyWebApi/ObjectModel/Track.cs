@@ -11,7 +11,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// The album on which the track appears. 
         /// The album object includes a link in href to full information about the album. 
         /// </summary>
-        public Album Album { get; } = new Album();
+        public Album Album { get; } = new Album(true, "Default, not yet populated");
 
         /// <summary>
         /// The artists who performed the track. 
@@ -70,7 +70,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Part of the response when Track Relinking is applied, and the requested track has been replaced with different track.
         /// The track in the linked_from object contains information about the originally requested track.
         /// </summary>
-        public TrackLink Linked_From { get; } = new TrackLink();
+        public TrackLink Linked_From { get; } = new TrackLink(true, "Default, not yet populated");
 
         /// <summary>
         /// The name of the track.

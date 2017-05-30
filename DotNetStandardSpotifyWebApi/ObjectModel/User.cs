@@ -249,37 +249,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
     }
 
-    public class Album : SpotifyObjectModel, ISpotifyObject {
-        private const string api_GetAlbum = baseUrl + "/v1/albums/{0}";
-        private const string api_GetAlbums = baseUrl + "/v1/albums?ids={0}";
-        private const string api_GetAlbumsTracks = baseUrl + "/v1/albums/{0}/tracks";
-
-        /// <summary>
-        /// JToken constructor
-        /// </summary>
-        /// <param name="token"></param>
-        public Album(JToken token) {
-
-        }
-
-        /// <summary>
-        /// Empty constructor
-        /// </summary>
-        public Album() {
-
-        }
-
-        /// <summary>
-        /// Error constructor
-        /// </summary>
-        /// <param name="wasError"></param>
-        /// <param name="errorMessage"></param>
-        public Album(bool wasError, string errorMessage) {
-            this.WasError = wasError;
-            this.ErrorMessage = errorMessage;
-        }
-    }
-
     public class AudioAnalysis : SpotifyObjectModel, ISpotifyObject {
         private const string api_GetAudioAnalysis = baseUrl + "/v1/audio-analysis/{0}";
     }
