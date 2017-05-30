@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class TrackLink : SpotifyObjectModel, ISpotifyObject {
@@ -6,7 +7,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// Known external URLs for this track.
         /// </summary>
-        public External_Url[] External_Urls { get; } = new External_Url[0];
+        public Dictionary<string, string> External_Urls { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// A link to the Web API endpoint providing full details of the track.
@@ -55,8 +56,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             Uri = token.Value<string>("uri") ?? string.Empty;
 
             JObject exturls = token.Value<JObject>("external_urls");
-            if(exturls != null) {
-                this.External_Urls = External_Url.FromJObject(exturls);
+            if (exturls != null) {
+                foreach (JProperty x in exturls.Properties()) {
+                    External_Urls.Add(x.Name, x.Value<JToken>().ToString());
+                }
             }
         }
 

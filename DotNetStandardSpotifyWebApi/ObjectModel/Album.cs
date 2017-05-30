@@ -32,12 +32,12 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// Known external URLs for the album. 
         /// </summary>
-        public External_Url[] External_Urls { get; } = new External_Url[0];
+        public Dictionary<string, string> External_Urls { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Known external IDs for the album.
         /// </summary>
-        public External_Id[] External_Ids { get; } = new External_Id[0];
+        public Dictionary<string, string> External_Ids { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// A list of the genres used to classify the album. 
@@ -125,13 +125,17 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             /* complex fields */
             JObject exturls = token.Value<JObject>("external_urls");
             if (exturls != null) {
-                External_Urls = External_Url.FromJObject(token.Value<JObject>("external_urls"));
+                foreach (JProperty x in exturls.Properties()) {
+                    External_Urls.Add(x.Name, x.Value<JToken>().ToString());
+                }
             }
 
             /* External Ids */
             JObject extids = token.Value<JObject>("external_ids");
             if (extids != null) {
-                External_Ids = External_Id.FromJObject(token.Value<JObject>("external_ids"));
+                foreach (JProperty x in extids.Properties()) {
+                    External_Ids.Add(x.Name, x.Value<JToken>().ToString());
+                }
             }
 
             /* Images */

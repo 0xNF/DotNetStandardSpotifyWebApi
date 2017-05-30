@@ -65,7 +65,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// Known external URLs for this user.
         /// </summary>
-        public External_Url[] External_urls { get; } = new External_Url[0];
+        public Dictionary<string, string> External_Urls { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// A link to the Web API endpoint for this user.
@@ -115,8 +115,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
             /* External Urls*/
             JObject exturls = token.Value<JObject>("external_urls");
-            if(exturls != null) {
-                External_Url.FromJObject(token.Value<JObject>("external_urls"));
+            if (exturls != null) {
+                foreach (JProperty x in exturls.Properties()) {
+                    External_Urls.Add(x.Name, x.Value<JToken>().ToString());
+                }
             }
 
             /* Followers */

@@ -12,7 +12,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// Known external URLs for this artist.
         /// </summary>
-        public External_Url[] External_Urls { get; } = new External_Url[0];
+        public Dictionary<string, string> External_Urls { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Information about the followers of the artist. 
@@ -78,7 +78,9 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             /* Complex Fields */
             JObject exturls = token.Value<JObject>("external_urls");
             if (exturls != null) {
-                External_Urls = External_Url.FromJObject(token.Value<JObject>("external_urls"));
+                foreach(JProperty x in exturls.Properties()) {
+                    External_Urls.Add(x.Name, x.Value<JToken>().ToString());
+                }
             }
 
             /* Followers */

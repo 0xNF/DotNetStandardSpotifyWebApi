@@ -43,12 +43,12 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// Known external IDs for the track.
         /// </summary>
-        public External_Id[] External_Ids { get; } = new External_Id[0];
+        public Dictionary<string, string> External_Ids { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Known external URLs for this track.
         /// </summary>
-        public External_Url[] External_urls { get; } = new External_Url[0];
+        public Dictionary<string, string> External_Urls { get; } = new Dictionary<string, string>();
 
         /// <summary>
         /// A link to the Web API endpoint providing full details of the track.
@@ -150,16 +150,19 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 Artists = arts.ToArray();
             }
 
+            JObject exturls = token.Value<JObject>("external_urls");
+            if (exturls != null) {
+                foreach (JProperty x in exturls.Properties()) {
+                    External_Urls.Add(x.Name, x.Value<JToken>().ToString());
+                }
+            }
+
             /* External Ids */
             JObject extids = token.Value<JObject>("external_ids");
             if (extids != null) {
-                External_Id.FromJObject(extids);
-            }
-
-            /* External URLs */
-            JObject exturls = token.Value<JObject>("external_urls");
-            if (exturls != null) {
-                External_Url.FromJObject(exturls);
+                foreach (JProperty x in extids.Properties()) {
+                    External_Ids.Add(x.Name, x.Value<JToken>().ToString());
+                }
             }
 
             /* Linked From */
