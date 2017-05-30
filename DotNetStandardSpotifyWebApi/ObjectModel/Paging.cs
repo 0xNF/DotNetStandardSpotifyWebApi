@@ -22,7 +22,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// The requested data.
         /// </summary>
-        public IReadOnlyList<T> Items { get; private set; } = new List<T>();
+        public IReadOnlyList<T> Items { get; } = new List<T>();
 
         /// <summary>
         /// The maximum number of items in the response (as set in the query or by default).
