@@ -86,7 +86,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// A collection containing a link (href) to the Web API endpoint where full details of the playlist's tracks can be retrieved, along with the total number of tracks in the playlist.
         /// </summary>
-        public PlaylistTrack[] Tracks { get; } = new PlaylistTrack[0];
+        public Paging<PlaylistTrack> Tracks { get; } = new Paging<PlaylistTrack>(true, "Default, not populated yet");
 
         /// <summary>
         /// The object type: "playlist"
@@ -204,7 +204,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="user_id">Spotify Id of playlist owner</param>
         /// <param name="accessToken">OAuth access token</param>
         /// <returns></returns>
-        public static async Task<Paging<ISpotifyObject>> GetPublicPlaylists(string user_id, string accessToken) {
+        public static async Task<Paging<Playlist>> GetPublicPlaylists(string user_id, string accessToken) {
             int limit = 50;
             int offset = 0;
             string req = string.Format(api_GetPublicPlaylists, user_id, limit, offset);
@@ -212,7 +212,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
                 JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
-                Paging<ISpotifyObject> paging = Paging<Playlist>.MakePlaylistPaging(token);;
+                Paging<Playlist> paging = new Paging<Playlist>(token);
                 return paging;
             }
             else {
@@ -227,7 +227,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="playlist_id">Playist Id</param>
         /// <param name="accessToken">OAuth access token</param>
         /// <returns></returns>
-        public static async Task<Paging<ISpotifyObject>> GetTracks(string user_id, string playlist_id, string accessToken) {
+        public static async Task<Paging<PlaylistTrack>> GetTracks(string user_id, string playlist_id, string accessToken) {
             int limit = 100;
             int offset = 0;
             string req = string.Format(api_GetPlaylistsTracks, user_id, playlist_id, limit, offset);
@@ -235,7 +235,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
                 JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
-                Paging<ISpotifyObject> page = Paging<ISpotifyObject>.MakeTrackPaging(token);
+                Paging<PlaylistTrack> page = new Paging<PlaylistTrack>(token);
                 return page;
             }
             else {

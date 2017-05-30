@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class Album : SpotifyObjectModel, ISpotifyObject {
@@ -91,7 +93,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// The tracks of the album.
         /// TODO is a Paging object, not a raw list of Tracks
         /// </summary>
-        public Track[] Tracks { get; } = new Track[0];
+        public Paging<Track> Tracks { get; } = new Paging<Track>(true, "Default, nothing here yet");
 
         /// <summary>
         /// The object type: "album"
@@ -121,14 +123,70 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             Uri = token.Value<string>("uri") ?? string.Empty;
 
             /* complex fields */
-            //Genre
-            //Artists
-            //available markets
-            //copyrights
-            //extids
-            //extruls
-            //images
+            JObject exturls = token.Value<JObject>("external_urls");
+            if (exturls != null) {
+                External_Urls = External_Url.FromJObject(token.Value<JObject>("external_urls"));
+            }
+
+            /* External Ids */
+            JObject extids = token.Value<JObject>("external_ids");
+            if (extids != null) {
+                External_Ids = External_Id.FromJObject(token.Value<JObject>("external_ids"));
+            }
+
+            /* Images */
+            JArray images = token.Value<JArray>("images");
+            if (images != null) {
+                List<Image> ims = new List<Image>();
+                foreach (JObject jobj in images.Values<JObject>()) {
+                    Image i = new Image(jobj);
+                    ims.Add(i);
+                }
+                Images = ims.ToArray();
+            }
+
+            /* Genres */
+            JArray genres = token.Value<JArray>("genres");
+            if (genres != null) {
+                List<string> gens = new List<string>();
+                foreach (JValue jv in genres) {
+                    string s = jv.ToString();
+                    gens.Add(s);
+                }
+                Genres = gens.ToArray();
+            }
+
+            /* Copyrights */
+            JArray copyrights = token.Value<JArray>("copyright");
+            if (copyrights != null) {
+                List<Copyright> cps = new List<Copyright>();
+                foreach (JObject jobj in copyrights.Values<JObject>()) {
+                    Copyright i = new Copyright(jobj);
+                    cps.Add(i);
+                }
+                Copyrights = cps.ToArray();
+            }
+
+            /* Available Markets */
+            JArray markets = token.Value<JArray>("available_markets");
+            if (markets != null) {
+                this.Available_Markets = markets.Values<string>().ToArray();
+            }
+
+            /* Artists */
+            JArray artists = token.Value<JArray>("artists");
+            if (artists != null) {
+                List<Artist> arts = new List<Artist>();
+                foreach (JObject jobj in artists) {
+                    arts.Add(new Artist(jobj));
+                }
+                Artists = arts.ToArray();
+            }
             //tracks
+            JToken paging = token.Value<JToken>("tracks");
+            if (paging != null) {
+                Tracks = new Paging<Track>(paging);
+            }
 
         }
 

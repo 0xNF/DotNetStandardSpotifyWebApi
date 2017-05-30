@@ -78,7 +78,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             /* Complex Fields */
             JObject exturls = token.Value<JObject>("external_urls");
             if (exturls != null) {
-                External_Url.FromJObject(token.Value<JObject>("external_urls"));
+                External_Urls = External_Url.FromJObject(token.Value<JObject>("external_urls"));
             }
 
             /* Followers */

@@ -201,7 +201,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// </summary>
         /// <param name="accessToken"></param>
         /// <returns></returns>
-        public async Task<Paging<ISpotifyObject>> GetCurrentUserPlaylists(string accessToken) {
+        public async Task<Paging<Playlist>> GetCurrentUserPlaylists(string accessToken) {
             int limit = 50;
             int offset = 0;
             string req = string.Format(api_GetPlaylists, limit, offset);
@@ -209,7 +209,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
                 JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
-                Paging<ISpotifyObject> paging = Paging<Playlist>.MakePlaylistPaging(token);
+                Paging<Playlist> paging = new Paging<Playlist>(token);
                 return paging;
             }
             else {
@@ -251,6 +251,20 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
     public class AudioAnalysis : SpotifyObjectModel, ISpotifyObject {
         private const string api_GetAudioAnalysis = baseUrl + "/v1/audio-analysis/{0}";
+
+
+        public AudioAnalysis() {
+
+        }
+
+        public AudioAnalysis(bool wasError, string errorMessage) {
+            WasError = wasError;
+            ErrorMessage = errorMessage;
+        }
+
+        public AudioAnalysis(JToken token) {
+
+        }
     }
 
     public class AudioFeatures : SpotifyObjectModel, ISpotifyObject {
@@ -258,6 +272,19 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         private const string api_GetAudioFeatures = baseUrl + "/v1/audio-features?ids={0}";
 
         public int Danceability { get; } = 0;
+
+        public AudioFeatures(JToken token) {
+
+        }
+
+        public AudioFeatures() {
+
+        }
+
+        public AudioFeatures(bool wasError, string errorMessage) {
+            WasError = wasError;
+            ErrorMessage = errorMessage;
+        }
     }
 
     public class Browse : SpotifyObjectModel, ISpotifyObject {

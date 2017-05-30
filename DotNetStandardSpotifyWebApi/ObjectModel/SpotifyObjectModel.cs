@@ -7,14 +7,19 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
+    public abstract class SpotifyObjectModel<T> {
+        internal const string baseUrl = "https://api.spotify.com";
+        public bool WasError { get; set; } = false;
+        public string ErrorMessage { get; set; } = string.Empty;
+    }
+
     public abstract class SpotifyObjectModel {
         internal const string baseUrl = "https://api.spotify.com";
         public bool WasError { get; set; } = false;
         public string ErrorMessage { get; set; } = string.Empty;
-
     }
 
     public interface ISpotifyObject {
-
     }
+
 }

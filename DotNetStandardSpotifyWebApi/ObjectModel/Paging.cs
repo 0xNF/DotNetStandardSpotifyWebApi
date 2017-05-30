@@ -50,13 +50,82 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         public int Total { get; } = 0;
 
 
-        private Paging(JToken token) {
+        /// <summary>
+        /// JToken constructor
+        /// </summary>
+        /// <param name="token"></param>
+        internal Paging(JToken token) {
             Href = token.Value<string>("href") ?? string.Empty;
             Total = token.Value<int?>("total") ?? 0;
             Limit = token.Value<int?>("limit") ?? 0;
             Offset = token.Value<int?>("offset") ?? 0;
             Next = token.Value<string>("next") ?? string.Empty;
             Previous = token.Value<string>("previous") ?? string.Empty;
+
+            Func<JObject, ISpotifyObject> generator;
+            Type t = typeof(T);
+            if (t == typeof(Playlist)) {
+                generator = (tk) => { return new Playlist(tk); };
+            }
+            else if (t == typeof(PlaylistTrack)) {
+                generator = (tk) => { return new PlaylistTrack(tk); };
+            }
+            else if (t == typeof(Track)) {
+                generator = (tk) => { return new Track(tk); };
+            }
+            else if (t == typeof(SavedTrack)) {
+                generator = (tk) => { return new SavedTrack(tk); };
+            }
+            else if (t == typeof(Artist)) {
+                generator = (tk) => { return new Artist(tk); };
+            }
+            else if (t == typeof(Album)) {
+                generator = (tk) => { return new Album(tk); };
+            }
+            else if (t == typeof(SavedAlbum)) {
+                generator = (tk) => { return new SavedAlbum(tk); };
+            }
+            else if (t == typeof(Category)) {
+                generator = (tk) => { return new Category(tk); };
+            }
+            else if (t == typeof(AudioFeatures)) {
+                generator = (tk) => { return new AudioFeatures(tk); };
+            }
+            else if (t == typeof(AudioAnalysis)) {
+                generator = (tk) => { return new AudioAnalysis(tk); };
+            }
+            else {
+                generator = (tk) => {
+                    throw new ArgumentException("Something happened while generating the paging item!");
+                };
+            }
+
+            JArray jarr = token.Value<JArray>("items");
+            if (jarr != null) {
+                List<T> lst = new List<T>();
+                foreach (JObject jobj in jarr) {
+                    T item = (T)generator(jobj);
+                    lst.Add(item);
+                }
+                Items = lst;
+            }
+        }
+
+        /// <summary>
+        /// Error constructor
+        /// </summary>
+        /// <param name="wasError"></param>
+        /// <param name="errorMessage"></param>
+        internal Paging(bool wasError, string errorMessage) {
+            this.WasError = wasError;
+            this.ErrorMessage = errorMessage;
+        }
+
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
+        internal Paging() {
+
         }
 
 
@@ -65,7 +134,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Throws an IndexOutOfRangeException if there are no more items
         /// </summary>
         /// <returns></returns>
-        public async Task<Paging<ISpotifyObject>> GetNext(string accessToken) {
+        public async Task<Paging<T>> GetNext(string accessToken) {
             /* Offset is past the total - therefore there's nothing left to get */
             if(string.IsNullOrWhiteSpace(Next) || Offset >= Total) {
                 throw new IndexOutOfRangeException($"Offset({Offset}) greater than Total number of Items({Total}). There are no more items left to get");
@@ -75,7 +144,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
                 if (response.IsSuccessStatusCode) {
                     JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
-                    Paging<ISpotifyObject> paging = Paging<ISpotifyObject>.MakePlaylistPaging(token);
+                    Paging<T> paging = new Paging<T>(token);
                     return paging;
                 }
             }
@@ -87,7 +156,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Throws an IndexOutOfRangeException if there are no more items
         /// </summary>
         /// <returns></returns>
-        public async Task<Paging<ISpotifyObject>> GetPrevious(string accessToken) {
+        public async Task<Paging<T>> GetPrevious(string accessToken) {
             if(string.IsNullOrWhiteSpace(Previous) || Offset <= 0) {
                 throw new IndexOutOfRangeException($"Offset({Offset}) already at or below 0. There are no more items left to get");
             }
@@ -96,85 +165,12 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
                 if (response.IsSuccessStatusCode) {
                     JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
-                    Paging<ISpotifyObject> paging = Paging<Playlist>.MakePlaylistPaging(token); //TODO this is super wrong. Its calling playlist, but this is generic and should call others instead
+                    Paging<T> paging = new Paging<T>(token);
                     return paging;
                 }
             }
             return null;
 
-        }
-
-        public static Paging<ISpotifyObject> MakePlaylistPaging(JToken token) {
-            Paging<ISpotifyObject> page = new Paging<ISpotifyObject>(token);
-            List<Playlist> lst = new List<Playlist>();
-            JArray jarr = token.Value<JArray>("items");
-            if(jarr != null) {
-                foreach(JObject jobj in jarr) {
-                    Playlist item = new Playlist(jobj);
-                    lst.Add(item);
-                }
-                page.Items = lst;
-            }
-            return page;
-        }
-
-        public static Paging<Artist> MakeArtistPaging(JToken token) {
-            Paging<Artist> page = new Paging<Artist>(token);
-            List<Artist> lst = new List<Artist>();
-            JArray jarr = token.Value<JArray>("items");
-            if (jarr != null) {
-                foreach (JObject jobj in jarr) {
-                    Artist item = new Artist(jobj);
-                    lst.Add(item);
-                }
-                page.Items = lst;
-            }
-
-            return page;
-        }
-
-        public static Paging<Album> MakeAlbumPaging(JToken token) {
-            Paging<Album> page = new Paging<Album>(token);
-            List<Album> lst = new List<Album>();
-            JArray jarr = token.Value<JArray>("items");
-            if (jarr != null) {
-                foreach (JObject jobj in jarr) {
-                    Album item = new Album(jobj);
-                    lst.Add(item);
-                }
-                page.Items = lst;
-            }
-
-            return page;
-        }
-
-        public static Paging<ISpotifyObject> MakeTrackPaging(JToken token) {
-            Paging<ISpotifyObject> page = new Paging<ISpotifyObject>(token);
-            List<Track> lst = new List<Track>();
-            JArray jarr = token.Value<JArray>("items");
-            if (jarr != null) {
-                foreach (JObject jobj in jarr) {
-                    Track item = new Track(jobj);
-                    lst.Add(item);
-                }
-                page.Items = lst;
-            }
-
-            return page;
-        }
-
-        public static Paging<Category> MakeCategoryPaging(JToken token) {
-            Paging<Category> page = new Paging<Category>(token);
-            List<Category> lst = new List<Category>();
-            JArray jarr = token.Value<JArray>("items");
-            if (jarr != null) {
-                foreach (JObject jobj in jarr) {
-                    Category item = new Category(jobj);
-                    lst.Add(item);
-                }
-                page.Items = lst;
-            }
-            return page;
         }
     }
 }
