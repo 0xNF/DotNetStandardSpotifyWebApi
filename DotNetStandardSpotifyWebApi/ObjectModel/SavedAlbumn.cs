@@ -35,7 +35,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="token"></param>
         public SavedAlbum(JToken token) {
             Added_At = token.Value<string>("added_at") ?? string.Empty;
-            JObject album = token.Value<JObject>("track");
+            JObject album = token.Value<JObject>("album");
             if (album != null) {
                 Album = new Album(album);
             }
