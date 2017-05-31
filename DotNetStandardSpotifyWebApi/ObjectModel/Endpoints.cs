@@ -17,7 +17,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
 
             Func<JToken, ISpotifyObject> generator;
             Type t = typeof(T);
-            if (t == typeof(Playlist)) {
+            if(t == typeof(User)) {
+                generator = (tk) => { return new User(tk); };
+            }
+            else if (t == typeof(Playlist)) {
                 generator = (tk) => { return new Playlist(tk); };
             }
             else if (t == typeof(PlaylistTrack)) {
@@ -64,6 +67,9 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             }
             else if(t == typeof(Paging<Category>)) {
                 generator = (tk) => { return new Paging<Category>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<Artist>)) {
+                generator = (tk) => { return new CursorBasedPaging<Artist>(tk); };
             }
             else if (t == typeof(FeaturedPlaylists)) {
                 generator = (tk) => { return new FeaturedPlaylists(tk); };
@@ -367,5 +373,56 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             string req = string.Format(endpoint) + options;
             return await DoHTTP<Paging<Playlist>>(req, accessToken);
         }
+        
+        ///Get the Current User (aka, as represented by the access token)
+        public static async Task<User> GetCurrentUser(string accessToken) {
+            string endpoint = "https://api.spotify.com/v1/me";
+            return await DoHTTP<User>(endpoint, accessToken);
+        }
+
+        //Get the users Followed Artists
+        //TODO UNTESTED
+        public static async Task<CursorBasedPaging<Artist>> GetUsersFollowedArtists(string accessToken, int limit = 20, string after = "") {
+            string type = "artist";
+            string endpoint = $"https://api.spotify.com/v1/me/following";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"type", type},
+                {"limit", limit },
+                {"after", after}
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = string.Format(endpoint) + options;
+            return await DoHTTP<CursorBasedPaging<Artist>>(req, accessToken, key:"artists");
+        }
+
+        //Follow Artists or Users, as specified by the type. Please ensure that all ids in ids are for the same type of Spotify Object
+        //that is, do not mix artist or users. For that, please issue a second request of only artists or users
+        //TODO UNTESTED
+        public static async Task<RegularError> FollowerArtistOrUser(string accessToken, string type, IEnumerable<string> ids) {
+            string endpoint = "https://api.spotify.com/v1/me/following";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"type", type}
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = string.Format(endpoint) + options;
+
+            Dictionary<string, object> putItems = new Dictionary<string, object>() {
+                {"ids", ids }
+            };
+            JObject putObject = JObject.FromObject(ids);
+
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(req, accessToken, HttpMethod.Put);
+            message.Headers.Accept.Clear();
+            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            message.Content = new StringContent(putObject.ToString());
+            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                return new RegularError(false, $"successfully followed {type}");
+            }
+            else {
+                return new RegularError((int)response.StatusCode, response.ReasonPhrase);
+            }
+        }
+        
     }
 }
