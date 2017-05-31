@@ -34,7 +34,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="message"></param>
         public RegularError(int status, string message) {
             Status = status;
-            message = message;
+            Message = message;
         }
 
         /// <summary>

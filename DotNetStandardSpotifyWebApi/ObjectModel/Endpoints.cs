@@ -381,7 +381,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         }
 
         //Get the users Followed Artists
-        //TODO UNTESTED
         public static async Task<CursorBasedPaging<Artist>> GetUsersFollowedArtists(string accessToken, int limit = 20, string after = "") {
             string type = "artist";
             string endpoint = $"https://api.spotify.com/v1/me/following";
