@@ -296,6 +296,72 @@ namespace DotNetStandardSpotifyWebApi.Tests
             Assert.True(tracks[1].Name == "Gimme Shelter", $"Expected Gimme Shelter, got {tracks[1].Name}");
         }
 
+        [Fact]
+        public async void GetAUsersPublicProfile(){
+            await setupCreds();
+            User u = await Endpoints.GetUsersProfile(Creds.Access_token, User_Follow);
+            Assert.False(u.WasError, "Object Error");
+            Assert.True(u.DisplayName == "Tanya Giang", $"Expected Tanya Giang, got {u.DisplayName}");
+        }
+
+        [Fact]
+        public async void GetAUsersPublicPlaylists(){
+            await setupCreds();
+            Paging<Playlist> page = await Endpoints.GetUsersPlaylists(Creds.Access_token, User_Follow);
+            Assert.False(page.WasError, "Object Error");
+            Assert.True(page.Total >= 7, $"Expected at least 7 items, got {page.Total}");
+        }
+
+        [Fact]
+        public async void GetCurrentUsersPlaylists(){
+            await setupCreds();
+            Paging<Playlist> page = await Endpoints.GetCurrentUsersPlaylists(Creds.Access_token);
+            Assert.False(page.WasError, "Object Error");
+            Assert.True(page.Total >= 20, $"Expected at least 20 items, but got {page.Total}");
+        }
+
+        [Fact]
+        public async void ShouldGetAPlaylist(){
+            await setupCreds();
+            Playlist p = await Endpoints.GetAPlaylist(Creds.Access_token, CurrentUserId, Playlist_Follow);
+            Assert.False(p.WasError, "Object Error");
+            Assert.True(p.Total == 5, $"Expected 5 tracks, got {p.Total}");
+            Assert.True(p.Name == "This House");
+        }
+
+        [Fact]
+        public async void ShouldGetAPlaylistsTracks(){
+            await setupCreds();
+            Paging<Track> page = await Endpoints.GetAPlaylistsTracks(Creds.Access_token, CurrentUserId, Playlist_Follow);
+            Assert.False(page.WasError, "Object Error");
+            Assert.True(page.Total == 5, $"Expected 5 tracks, got {page.Total}");
+        }
+
+        [Fact]
+        public async void ShouldCreateAPlaylist(){
+            await setupCreds();
+            Playlist created = await Endpoints.CreateAPlaylist(Creds.Access_token, CurrentUserId, "TEST");
+            Assert.False(created.WasError, "Object Error");
+        }
+
+        [Fact]
+        public async void ShouldModifyAPlaylist(){
+            await setupCreds();
+            RegularError res = await Endpoints.ChangePlaylistDetails(Creds.Access_token, CurrentUserId, Playlist_Follow, null, null, "", "Songs for This House, baby.");
+            Assert.False(res.WasError, "Object Error");
+        }
+
+        [Fact]
+        public async void ShouldAddSongsToPlaylist(){
+            await setupCreds();
+            string pid = "58g0qfBM60xjsJadLkzumx";
+            List<string> uris = new List<string>(){
+                "spotify:track:7rXhnFjG74YKMgq0R89Bpz"
+            };
+            RegularError res = await Endpoints.AddTracksToPlaylist(Creds.Access_token, CurrentUserId, pid, uris);
+            Assert.False(res.WasError, "Object Error");
+        }
+
     }
 
 }

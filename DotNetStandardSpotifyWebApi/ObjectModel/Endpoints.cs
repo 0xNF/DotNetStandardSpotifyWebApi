@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using DotNetStandardSpotifyWebApi.Helpers;
-using DotNetStandardSpotifyWebApi.ObjectModel;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -991,6 +990,264 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             string req = endpoint + options;
             return await DoSeveralHttp<Track>(req, type, accessToken);
         }
+
+        /// <summary>
+        /// Get public profile information about a Spotify user.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="user_id">The user's Spotify user ID.</param>
+        /// <returns></returns>
+        public static async Task<User> GetUsersProfile(string accessToken, string user_id) {
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}";
+            return await DoHTTP<User>(endpoint, accessToken);
+        }
+
+        /// <summary>
+        /// Get a list of the playlists owned or followed by a Spotify user.
+        /// 
+        /// Private playlists are only retrievable for the current user and requires the playlist-read-private scope to have been authorized by the user.
+        /// Note that this scope alone will not return collaborative playlists, even though they are always private.
+        /// 
+        ///  Collaborative playlists are only retrievable for the current user and requires the playlist-read-collaborative scope to have been authorized by the user. 
+        ///  
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="user_id">The user's Spotify user ID.</param>
+        /// <param name="limit">Optional. The maximum number of playlists to return. Default: 20. Minimum: 1. Maximum: 50. </param>
+        /// <param name="offset">Optional. The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with limit to get the next set of playlists. </param>
+        /// <returns></returns>
+        public static async Task<Paging<Playlist>> GetUsersPlaylists(string accessToken, string user_id, int limit = 20, int offset = 0) {
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"limit",limit },
+                {"offset",offset },
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<Paging<Playlist>>(req, accessToken);
+        }
+
+        /// <summary>
+        /// Get a list of the playlists owned or followed by the current Spotify user.
+        /// 
+        ///  Private playlists require the playlist-read-private scope to have been authorized by the user. 
+        ///  Note that this scope alone will not return collaborative playlists, even though they are always private.
+        ///  
+        ///  Collaborative playlists require the playlist-read-collaborative scope to have been authorized by the user. 
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="limit">Optional. The maximum number of playlists to return. Default: 20. Minimum: 1. Maximum: 50. </param>
+        /// <param name="offset">Optional. The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with limit to get the next set of playlists. </param>
+        /// <returns></returns>
+        public static async Task<Paging<Playlist>> GetCurrentUsersPlaylists(string accessToken, int limit = 20, int offset = 0) {
+            string endpoint = $"https://api.spotify.com/v1/me/playlists";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"limit",limit },
+                {"offset",offset },
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<Paging<Playlist>>(req, accessToken);
+        }
+
+        /// <summary>
+        /// Get a playlist owned by a Spotify user.
+        /// Both Public and Private playlists belonging to any user are retrievable on provision of a valid access token.
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="user_id">The user's Spotify user ID.</param>
+        /// <param name="playlist_id">The Spotify ID for the playlist.</param>
+        /// <param name="fields">
+        /// Optional. Filters for the query: a comma-separated list of the fields to return. If omitted, all fields are returned. For example, to get just the playlist's description and URI:
+        /// fields="description,uri"
+        /// A dot separator can be used to specify non-reoccurring fields, while parentheses can be used to specify reoccurring fields within objects. For example, to get just the added date and user ID of the adder: 
+        /// fields="tracks.items(added_at,added_by.id)"
+        /// Use multiple parentheses to drill down into nested objects, for example:
+        /// fields="tracks.items(track(name,href,album(name,href)))"
+        /// Fields can be excluded by prefixing them with an exclamation mark, for example:
+        /// fields="tracks.items(track(name,href,album(!name,href)))"
+        /// </param>
+        /// <param name="market">Optional. An ISO 3166-1 alpha-2 country code. Provide this parameter if you want to apply Track Relinking.</param>
+        /// <returns></returns>
+        public static async Task<Playlist> GetAPlaylist(string accessToken, string user_id, string playlist_id, string fields = "", string market = "") {
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"fields",fields},
+                {"market",market },
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<Playlist>(req, accessToken);
+        }
+
+        /// <summary>
+        /// Get full details of the tracks of a playlist owned by a Spotify user.
+        ///  Both Public and Private playlists belonging to any user are retrievable on provision of a valid access token.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="user_id">The user's Spotify user ID.</param>
+        /// <param name="playlist_id">The Spotify ID for the playlist.</param>
+        /// <param name="fields">
+        /// Optional. Filters for the query: a comma-separated list of the fields to return. If omitted, all fields are returned. For example, to get just the total number of tracks and the request limit:
+        ///     fields="total,limit"
+        ///  A dot separator can be used to specify non-reoccurring fields, while parentheses can be used to specify reoccurring fields within objects. For example, to get just the added date and user ID of the adder: 
+        ///      fields="items(added_at,added_by.id)"
+        ///  Use multiple parentheses to drill down into nested objects, for example:
+        ///       fields="items(track(name,href,album(name,href)))"
+        ///  Fields can be excluded by prefixing them with an exclamation mark, for example:
+        ///      fields="items.track.album(!external_urls,images)"
+        /// </param>
+        /// <param name="market">Optional. An ISO 3166-1 alpha-2 country code. Provide this parameter if you want to apply Track Relinking.</param>
+        /// <param name="limit">Optional. The maximum number of tracks to return. Default: 100. Minimum: 1. Maximum: 100. </param>
+        /// <param name="offset">Optional. The index of the first track to return. Default: 0 (the first object). </param>
+        /// <returns></returns>
+        public static async Task<Paging<Track>> GetAPlaylistsTracks(string accessToken, string user_id, string playlist_id, string fields = "", string market = "", int limit = 20, int offset = 0) {
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"fields",fields},
+                {"market",market },
+                {"limit",limit },
+                {"offset",offset }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<Paging<Track>>(req, accessToken);
+        }
+
+        /// <summary>
+        /// Create a playlist for a Spotify user. 
+        /// (The playlist will be empty until you add tracks.)
+        /// Creating a public playlist for a user requires authorization of the playlist-modify-public scope; creating a private playlist requires the playlist-modify-private scope. See Using Scopes.
+        /// To create collaborative playlists you must have granted playlist-modify-private and playlist-modify-public scopes.
+        /// </summary>
+        /// <param name="accessToken">Oauh access token</param>
+        /// <param name="user_id">The user's Spotify user ID.</param>
+        /// <param name="name">Required. The name for the new playlist, for example "Your Coolest Playlist". This name does not need to be unique; a user may have several playlists with the same name.</param>
+        /// <param name="description"></param>
+        /// <param name="isPublic">Optional, default true. If true the playlist will be public, if false it will be private. To be able to create private playlists, the user must have granted the playlist-modify-private scope.</param>
+        /// <param name="isCollaborative">Optional, default false. If true the playlist will be collaborative. Note that to create a collaborative playlist you must also set public to false.</param>
+        /// <returns></returns>
+        public static async Task<Playlist> CreateAPlaylist(string accessToken, string user_id, string name, string description = "", bool isPublic = true, bool isCollaborative = false) {
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists";
+            Dictionary<string, object> putItems = new Dictionary<string, object>() {
+                {"name",name},
+                {"public",isPublic},
+                {"collaborative",isCollaborative },
+                {"description",description }
+            };
+
+            JObject putObject = JObject.FromObject(putItems);
+
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, HttpMethod.Post);
+            message.Headers.Accept.Clear();
+            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            message.Content = new StringContent(putObject.ToString());
+            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                string content = await response.Content.ReadAsStringAsync();
+                JObject token = JObject.Parse(content);
+                return new Playlist(token);
+            }
+            else {
+                return new Playlist(true, response.ReasonPhrase);
+            }
+        }
+
+        /// <summary>
+        /// Change a playlist’s name and public/private state. (The user must, of course, own the playlist.)
+        /// Changing a public playlist for a user requires authorization of the playlist-modify-public scope; 
+        /// changing a private playlist requires the playlist-modify-private scope. See Using Scopes.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="user_id">The user's Spotify user ID.</param>
+        /// <param name="playlist_id">The Spotify ID for the playlist.</param>
+        /// <param name="isPublic">Optional. If true the playlist will be public, if false it will be private.</param>
+        /// <param name="isCollaborative">Optional. If true, the playlist will become collaborative and other users will be able to modify the playlist in their Spotify client. Note: You can only set collaborative to true on non-public playlists.</param>
+        /// <param name="name">Optional. The new name for the playlist, for example "My New Playlist Title".</param>
+        /// <param name="description">Optional, value for playlist description as displayed in Spotify Clients and in the Web API.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> ChangePlaylistDetails(string accessToken, string user_id, string playlist_id, bool? isPublic, bool? isCollaborative, string name = "", string description = "") {
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}";
+            Dictionary<string, object> putItems = new Dictionary<string, object>();
+            if (!string.IsNullOrWhiteSpace(name)) {
+                putItems.Add("name", name);
+            }
+            if (!string.IsNullOrWhiteSpace(description)) {
+                putItems.Add("description", description);
+            }
+            if (isPublic.HasValue) {
+                putItems.Add("public", isPublic);
+            }
+            if (isCollaborative.HasValue) {
+                putItems.Add("collaborative", isCollaborative);
+            }
+            if (!putItems.Any()) {
+                return new RegularError(true, "no fields to modifiy");
+            }
+
+            JObject putObject = JObject.FromObject(putItems);
+
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, HttpMethod.Put);
+            message.Headers.Accept.Clear();
+            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            message.Content = new StringContent(putObject.ToString());
+            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                return new RegularError(false, "Succesfully modified playlist");
+            }
+            else {
+                return new RegularError(true, response.ReasonPhrase);
+
+            }
+        }
+
+        /// <summary>
+        /// Add one or more tracks to a user’s playlist.
+        /// Note that local tracks can’t be added.
+        ///  Adding tracks to the current user's public playlists requires authorization of the playlist-modify-public scope; 
+        ///  adding tracks to the current user's private playlist (including collaborative playlists) requires the playlist-modify-private scope. 
+        ///  See Using Scopes.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="user_id">The user's Spotify user ID.</param>
+        /// <param name="playlist_id">The Spotify ID for the playlist.</param>
+        /// <param name="uris">Spotify URIs to add. NOTE: This is the whole Spotify URI, not just the track id</param>
+        /// <param name="position">
+        /// Optional. The position to insert the tracks, a zero-based index. 
+        /// For example, to insert the tracks in the first position: position=0;
+        /// to insert the tracks in the third position: position=2. 
+        /// If omitted, the tracks will be appended to the playlist.
+        /// Tracks are added in the order they are listed in the query string or request body.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> AddTracksToPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<string> uris, int? position = null) {
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
+            int maxParams = 100;
+            string[] uriArr = uris.Take(maxParams).ToArray();
+            Dictionary<string, object> putItems = new Dictionary<string, object>() {
+                {"uris", string.Join(",", uriArr) },
+            };
+            if (position.HasValue) {
+                putItems.Add("position", position);
+            }
+            
+
+            JObject putObject = JObject.FromObject(putItems);
+
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, HttpMethod.Post);
+            message.Headers.Accept.Clear();
+            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            message.Content = new StringContent(putObject.ToString());
+            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                string content = await response.Content.ReadAsStringAsync();
+                return new RegularError(false, content);
+            }
+            else {
+                return new RegularError(true, response.ReasonPhrase);
+            }
+        }
+
+
 
     }
 
