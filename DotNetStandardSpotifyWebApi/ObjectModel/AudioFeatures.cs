@@ -5,11 +5,15 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         private const string api_GetAudioFeature = baseUrl + "/v1/audio-features/{0}";
         private const string api_GetAudioFeatures = baseUrl + "/v1/audio-features?ids={0}";
 
+
+
         /// <summary>
         /// A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 
         /// 1.0 represents high confidence the track is acoustic.
         /// </summary>
         public double Acousticness { get; } = 0.0;
+        public const double Acousticness_Max = 1;
+        public const double Acousticness_Min = 0;
 
         /// <summary>
         /// An HTTP URL to access the full audio analysis of this track.
@@ -24,6 +28,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// A value of 0.0 is least danceable and 1.0 is most danceable.
         /// </summary>
         public double Danceability { get; } = 0.0;
+        public const double Danceability_Max = 1;
+        public const double Danceability_Min = 0;
 
         /// <summary>
         /// The duration of the track in milliseconds.
@@ -38,6 +44,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// timbre, onset rate, and general entropy.
         /// </summary>
         public double Energy { get; } = 0.0;
+        public const double Energy_Max = 1;
+        public const double Energy_Min = 0;
 
         /// <summary>
         /// The Spotify ID for the track. 
@@ -54,6 +62,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// but confidence is higher as the value approaches 1.0.
         /// </summary>
         public double Instrumentalness { get; } = 0.0;
+        public const double Instrumentalness_Max = 1;
+        public const double Instrumentalness_Min = 0;
 
         /// <summary>
         /// The key the track is in. 
@@ -61,6 +71,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// E.g. 0 = C, 1 = C♯/D♭, 2 = D, and so on.
         /// </summary>
         public int Key { get; } = 0;
+        public const int Key_Max = 12;
+        public const int Key_Min = 0;
 
         /// <summary>
         /// Detects the presence of an audience in the recording.
@@ -68,6 +80,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// A value above 0.8 provides strong likelihood that the track is live.
         /// </summary>
         public double Liveness { get; } = 0.0;
+        public const double Liveness_Max = 1;
+        public const double Liveness_Min = 0;
 
         /// <summary>
         /// The overall loudness of a track in decibels (dB). 
@@ -77,6 +91,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Values typical range between -60 and 0 db.
         /// </summary>
         public double Loudness { get; } = 0.0;
+        public const double Loudness_Max = 100;
+        public const double Loudness_Min = -100;
 
         /// <summary>
         /// Mode indicates the modality (major or minor) of a track, 
@@ -84,6 +100,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Major is represented by 1 and minor is 0.
         /// </summary>
         public int Mode { get; } = 0;
+        public const int Mode_Max = 1;
+        public const int Mode_Min = 0;
 
         /// <summary>
         /// Speechiness detects the presence of spoken words in a track.
@@ -95,6 +113,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Values below 0.33 most likely represent music and other non-speech-like tracks.
         /// </summary>
         public double Speechiness { get; } = 0.0;
+        public const double Speechiness_Max = 1;
+        public const double Speechiness_Min = 0;
 
         /// <summary>
         /// The overall estimated tempo of a track in beats per minute (BPM).
@@ -102,12 +122,16 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// and derives directly from the average beat duration.
         /// </summary>
         public double Tempo { get; } = 0.0;
+        public const double Tempo_Max = 500;
+        public const double Tempo_Min = 0;
 
         /// <summary>
         /// An estimated overall time signature of a track. 
         /// The time signature (meter) is a notational convention to specify how many beats are in each bar (or measure).
         /// </summary>
         public int Time_Signature { get; } = 0;
+        public const int Time_Signature_Max = -1;
+        public const int Time_Signature_Min = 7;
 
         /// <summary>
         /// A link to the Web API endpoint providing full details of the track.
@@ -130,6 +154,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// while tracks with low valence sound more negative (e.g. sad, depressed, angry).
         /// </summary>
         public double Valence { get; } = 0.0;
+        public const double Valence_Max = 1;
+        public const double Valence_Min = 0;
 
 
         /// <summary>
@@ -172,6 +198,31 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             WasError = wasError;
             ErrorMessage = errorMessage;
         }
+
+        /// <summary>
+        /// Fields Constructor
+        /// </summary>
+        public AudioFeatures(double acousticness, double danceability, double energy, double instrumentalness, int key, double liveness, double loudness, int mode, double speechiness, double tempo, int time_signature, double valence, string analysis_url, int duration, string id, string uri, string track_href) {
+            this.Acousticness = acousticness;
+            this.Analysis_Url = analysis_url;
+            this.Danceability = danceability;
+            this.Duration_MS = duration;
+            this.Energy = energy;
+            this.Id = id;
+            this.Instrumentalness = instrumentalness;
+            this.Key = key;
+            this.Liveness = liveness;
+            this.Loudness = loudness;
+            this.Mode = mode;
+            this.Speechiness = speechiness;
+            this.Tempo = tempo;
+            this.Time_Signature = time_signature;
+            this.Track_Href = track_href;
+            this.Uri = uri;
+            this.Valence = valence;
+        }
+
+
     }
 
 }

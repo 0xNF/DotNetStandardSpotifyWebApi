@@ -859,6 +859,139 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             return await DoHttpGetBools(accessToken, req);
         }
 
+
+        /// <summary>
+        /// Get the current user’s top artists or tracks based on calculated affinity.
+        /// Affinity is a measure of the expected preference a user has for a particular track or artist. 
+        /// It is based on user behavior, including play history, but does not include actions made while in incognito mode. 
+        /// Light or infrequent users of Spotify may not have sufficient play history to generate a full affinity data set.
+        /// 
+        /// As a user’s behavior is likely to shift over time, this preference data is available over three time spans.
+        /// See time_range in the query parameter table for more information. 
+        /// 
+        /// For each time range, the top 50 tracks and artists are available for each user. 
+        /// In the future, it is likely that this restriction will be relaxed. 
+        /// This data is typically updated once each day for each user.
+        /// 
+        /// Getting details of a user's top artists and tracks requires authorization of the user-top-read scope. See Using Scopes.
+        /// 
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="limit">Optional. The number of entities to return. Default: 20. Minimum: 1. Maximum: 50.</param>
+        /// <param name="offset">Optional. The index of the first entity to return. Default: 0 (i.e., the first track). Use with limit to get the next set of entities.</param>
+        /// <param name="time_range">Optional. Over what time frame the affinities are computed. Valid values: long_term (calculated from several years of data and including all new data as it becomes available), medium_term (approximately last 6 months), short_term (approximately last 4 weeks). Default: medium_term. </param>
+        /// <returns></returns>
+        public static async Task<Paging<Artist>> GetUsersTopArtists(string accessToken, int limit = 20, int offset=0, string time_range = "medium_term") {
+            string type = "artists";
+            string endpoint = $"https://api.spotify.com/v1/me/top/{type}";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"limit",limit },
+                {"offset",offset },
+                {"time_range",time_range}
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<Paging<Artist>>(req, accessToken);
+        }
+
+        /// <summary>
+        /// Get the current user’s top artists or tracks based on calculated affinity.
+        /// Affinity is a measure of the expected preference a user has for a particular track or artist. 
+        /// It is based on user behavior, including play history, but does not include actions made while in incognito mode. 
+        /// Light or infrequent users of Spotify may not have sufficient play history to generate a full affinity data set.
+        /// 
+        /// As a user’s behavior is likely to shift over time, this preference data is available over three time spans.
+        /// See time_range in the query parameter table for more information. 
+        /// 
+        /// For each time range, the top 50 tracks and artists are available for each user. 
+        /// In the future, it is likely that this restriction will be relaxed. 
+        /// This data is typically updated once each day for each user.
+        /// 
+        /// Getting details of a user's top artists and tracks requires authorization of the user-top-read scope. See Using Scopes.
+        /// 
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="limit">Optional. The number of entities to return. Default: 20. Minimum: 1. Maximum: 50.</param>
+        /// <param name="offset">Optional. The index of the first entity to return. Default: 0 (i.e., the first track). Use with limit to get the next set of entities.</param>
+        /// <param name="time_range">Optional. Over what time frame the affinities are computed. Valid values: long_term (calculated from several years of data and including all new data as it becomes available), medium_term (approximately last 6 months), short_term (approximately last 4 weeks). Default: medium_term. </param>
+        /// <returns></returns>
+        public static async Task<Paging<Track>> GetUsersTopTracks(string accessToken, int limit = 20, int offset = 0, string time_range = "medium_term") {
+            string type = "tracks";
+            string endpoint = $"https://api.spotify.com/v1/me/top/{type}";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"limit",limit },
+                {"offset",offset },
+                {"time_range",time_range}
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<Paging<Track>>(req, accessToken);
+        }
+
+        //TODO Recommendations
+        //This is complicated
+        //    public static async Task<Recommendation> GetRecommendationsBasedOnSeed(string accessToken, AudioFeatures MaxTuneableValues = null, AudioFeatures MinTuneableValues = null, AudioFeatures TargetValues = null,  IEnumerable<string> seed_artists = null, IEnumerable<string> seed_tracks, IEnumerable<string> seed_genres, int limit = 20, string market = "", ) {
+        //        if(MaxTuneableValues == null) {
+        //            MaxTuneableValues = new AudioFeatures(
+        //                    AudioFeatures.Acousticness_Max, AudioFeatures.Danceability_Max, AudioFeatures.Energy_Max, AudioFeatures.Instrumentalness_Max,
+        //                    AudioFeatures.Key_Max, AudioFeatures.Liveness_Max, AudioFeatures.Loudness_Max, AudioFeatures.Mode_Max, AudioFeatures.Speechiness_Max, 
+        //                    AudioFeatures.Tempo_Max, AudioFeatures.Time_Signature_Max, AudioFeatures.Valence_Max,
+        //                    "", int.MaxValue, "", "", "");
+        //        }
+        //        if (MinTuneableValues == null) {
+        //            MinTuneableValues = new AudioFeatures(
+        //                    AudioFeatures.Acousticness_Min, AudioFeatures.Danceability_Min, AudioFeatures.Energy_Min, AudioFeatures.Instrumentalness_Min,
+        //                    AudioFeatures.Key_Min, AudioFeatures.Liveness_Min, AudioFeatures.Loudness_Min, AudioFeatures.Mode_Min, AudioFeatures.Speechiness_Min,
+        //                    AudioFeatures.Tempo_Min, AudioFeatures.Time_Signature_Min, AudioFeatures.Valence_Min,
+        //                    "", int.MaxValue, "", "", "");
+        //        
+        //    }
+
+        //TODO Search
+        //Also complicated
+
+
+        /// <summary>
+        /// Get Spotify catalog information for a single track identified by its unique Spotify ID.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="id">The Spotify ID for the track.</param>
+        /// <param name="market">Optional. An ISO 3166-1 alpha-2 country code. Provide this parameter if you want to apply Track Relinking.</param>
+        /// <returns></returns>
+        public static async Task<Track> GetATrack(string accessToken, string id, string market = "") {
+                string endpoint = $"https://api.spotify.com/v1/tracks/{id}";
+                Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                    {"market",market },
+                };
+                string options = EncodeRequestParams(paramDict);
+                string req = endpoint + options;
+                return await DoHTTP<Track>(req, accessToken);
+            }
+
+        /// <summary>
+        /// Get Spotify catalog information for multiple tracks based on their Spotify IDs.
+        /// 
+        /// Objects are returned in the order requested. If an object is not found, a null value is returned in the appropriate position. 
+        /// Duplicate ids in the query will result in duplicate objects in the response. 
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="ids">A List of Spotify Ids</param>
+        /// <param name="market">Optional. An ISO 3166-1 alpha-2 country code. Provide this parameter if you want to apply Track Relinking.</param>
+        /// <returns></returns>
+        public static async Task<IEnumerable<Track>> GetSeveralTracks(string accessToken, IEnumerable<string> ids, string market = "") {
+            string type = "tracks";
+            string endpoint = "https://api.spotify.com/v1/tracks";
+            int maxParams = 50;
+            string[] idArr = ids.Take(maxParams).ToArray();
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"ids", string.Join(",", idArr)},
+                {"market",market},
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoSeveralHttp<Track>(req, type, accessToken);
+        }
+
     }
-    
+
 }

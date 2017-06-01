@@ -4,6 +4,8 @@ using DotNetStandardSpotifyWebApi.Helpers;
 using DotNetStandardSpotifyWebApi.Authorization;
 using DotNetStandardSpotifyWebApi.ObjectModel;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DotNetStandardSpotifyWebApi.Tests
 {
@@ -16,13 +18,13 @@ namespace DotNetStandardSpotifyWebApi.Tests
         private const string Artist_Follow = "13FGWDOwAoQyIBuZLtCjN9"; //Taku Takahashi
 
         //An Artist the current user does not follow
-        private const string Artist_NoFollow = "13FGWDOwAoQyIBuZLtCjN9"; // The Rolling Stones
+        private const string Artist_NoFollow = "22bE4uQ6baNwSHPVcDxLCe"; // The Rolling Stones
 
         //A User the current user follows
         private const string User_Follow = "22vlmkwgjsj2qt7wmztbymneq"; //Tanya Giang
 
         //A User the current user does not follow
-        private const string User_NoFollow = "22vlmkwgjsj2qt7wmztbymneq"; //Paul Gasca
+        private const string User_NoFollow = "canaloff"; //canaloff
 
         //An Album the current user has saved
         private const string Album_Saved = "1BhxcmomhUniLCu173Rpn4"; //Tower of Heaven (Original Soundtrack) - flashygoodness
@@ -40,7 +42,7 @@ namespace DotNetStandardSpotifyWebApi.Tests
         private const string Track_Saved = "6Prexw6BkRje5joeSDg0iN"; //Deezy Daisy - Oxford Remix
 
         //A track the current user does not have in their library
-        private const string Track_NoSaved = "6Prexw6BkRje5joeSDg0iN"; //Gimme Shelter - The Rolling Stones
+        private const string Track_NoSaved = "6H3kDe7CGoWYBabAeVWGiD"; //Gimme Shelter - The Rolling Stones
 
         private const string CategoryCheck = "party";
 
@@ -219,16 +221,80 @@ namespace DotNetStandardSpotifyWebApi.Tests
 
         }
 
-        public async void ShoudlRemoveUsersSavedAlbum(){
+        public async void ShouldRemoveUsersSavedAlbum(){
             await setupCreds();
 
         }
 
-        public async void ShoudlCheckUsersSavedAlbums(){
+        public async void ShouldCheckUsersSavedAlbums(){
             await setupCreds();
 
         }
 
+        [Fact]
+        public async void ShouldGetUsersTopArtists(){
+            await setupCreds();
+            Paging<Artist> page = await Endpoints.GetUsersTopArtists(Creds.Access_token);
+            Assert.False(page.WasError, "Object Error");
+            Assert.True(page.Items.Count == 20, $"Expected 20 items, got {page.Items.Count}");
+        }
+
+        [Fact]
+        public async void ShouldGetUsersTopTracks(){
+            await setupCreds();
+            Paging<Track> page = await Endpoints.GetUsersTopTracks(Creds.Access_token);
+            Assert.False(page.WasError, "Object Error");
+            Assert.True(page.Items.Count == 20, $"Expected 20 items, got {page.Items.Count}");
+        }
+
+        public async void ShouldGetRecommendations(){
+            await setupCreds();
+        }
+
+        public async void ShouldSearchForArtists(){
+            await setupCreds();
+        }
+
+        public async void ShouldSearchForAlbums(){
+            await setupCreds();
+
+        }
+
+        public async void ShouldSearchForTracks(){
+            await setupCreds();
+
+        }
+
+        public async void ShouldSearchForPlaylists(){
+            await setupCreds();
+
+        }
+
+        public async void ShoudlSearchForEverything(){
+            await setupCreds();
+
+        }
+
+        [Fact]
+        public async void ShouldGetATrack(){
+            await setupCreds();
+            Track t = await Endpoints.GetATrack(Creds.Access_token, Track_Saved);
+            Assert.False(t.WasError, "Object Error");
+            Assert.True(t.Name == "Deezy Daisy - Oxford Remix", $"Expected Deezy Daisy - Oxford Remix, got {t.Name}");
+        }
+
+        [Fact]
+        public async void ShouldGetSeveralTracks(){
+            await setupCreds();
+            List<string> ids = new List<string>(){
+              Track_Saved,
+              Track_NoSaved,
+            };
+            List<Track> tracks = (await Endpoints.GetSeveralTracks(Creds.Access_token, ids)).ToList();
+            Assert.True(tracks.Count == 2, $"Expected 2 tracks, got {tracks.Count}");
+            Assert.True(tracks[0].Name == "Deezy Daisy - Oxford Remix", $"Expected Deezy Daisy - Oxford Remix, got {tracks[0].Name}");
+            Assert.True(tracks[1].Name == "Gimme Shelter", $"Expected Gimme Shelter, got {tracks[1].Name}");
+        }
 
     }
 
