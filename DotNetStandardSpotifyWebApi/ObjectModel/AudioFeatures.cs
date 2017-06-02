@@ -11,7 +11,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 
         /// 1.0 represents high confidence the track is acoustic.
         /// </summary>
-        public double Acousticness { get; } = 0.0;
+        public double? Acousticness { get; } = 0.0;
         public const double Acousticness_Max = 1;
         public const double Acousticness_Min = 0;
 
@@ -27,14 +27,14 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// rhythm stability, beat strength, and overall regularity.
         /// A value of 0.0 is least danceable and 1.0 is most danceable.
         /// </summary>
-        public double Danceability { get; } = 0.0;
+        public double? Danceability { get; } = 0.0;
         public const double Danceability_Max = 1;
         public const double Danceability_Min = 0;
 
         /// <summary>
         /// The duration of the track in milliseconds.
         /// </summary>
-        public int Duration_MS { get; } = 0;
+        public int? Duration_MS { get; } = 0;
 
         /// <summary>
         /// Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. 
@@ -43,7 +43,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Perceptual features contributing to this attribute include dynamic range, perceived loudness, 
         /// timbre, onset rate, and general entropy.
         /// </summary>
-        public double Energy { get; } = 0.0;
+        public double? Energy { get; } = 0.0;
         public const double Energy_Max = 1;
         public const double Energy_Min = 0;
 
@@ -61,7 +61,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Values above 0.5 are intended to represent instrumental tracks,
         /// but confidence is higher as the value approaches 1.0.
         /// </summary>
-        public double Instrumentalness { get; } = 0.0;
+        public double? Instrumentalness { get; } = 0.0;
         public const double Instrumentalness_Max = 1;
         public const double Instrumentalness_Min = 0;
 
@@ -70,7 +70,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Integers map to pitches using standard Pitch Class notation. 
         /// E.g. 0 = C, 1 = C♯/D♭, 2 = D, and so on.
         /// </summary>
-        public int Key { get; } = 0;
+        public int? Key { get; } = 0;
         public const int Key_Max = 12;
         public const int Key_Min = 0;
 
@@ -79,7 +79,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Higher liveness values represent an increased probability that the track was performed live.
         /// A value above 0.8 provides strong likelihood that the track is live.
         /// </summary>
-        public double Liveness { get; } = 0.0;
+        public double? Liveness { get; } = 0.0;
         public const double Liveness_Max = 1;
         public const double Liveness_Min = 0;
 
@@ -90,7 +90,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// sound that is the primary psychological correlate of physical strength (amplitude).
         /// Values typical range between -60 and 0 db.
         /// </summary>
-        public double Loudness { get; } = 0.0;
+        public double? Loudness { get; } = 0.0;
         public const double Loudness_Max = 100;
         public const double Loudness_Min = -100;
 
@@ -99,7 +99,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// the type of scale from which its melodic content is derived. 
         /// Major is represented by 1 and minor is 0.
         /// </summary>
-        public int Mode { get; } = 0;
+        public int? Mode { get; } = 0;
         public const int Mode_Max = 1;
         public const int Mode_Min = 0;
 
@@ -112,7 +112,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// either in sections or layered, including such cases as rap music. 
         /// Values below 0.33 most likely represent music and other non-speech-like tracks.
         /// </summary>
-        public double Speechiness { get; } = 0.0;
+        public double? Speechiness { get; } = 0.0;
         public const double Speechiness_Max = 1;
         public const double Speechiness_Min = 0;
 
@@ -121,7 +121,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// In musical terminology, tempo is the speed or pace of a given piece 
         /// and derives directly from the average beat duration.
         /// </summary>
-        public double Tempo { get; } = 0.0;
+        public double? Tempo { get; } = 0.0;
         public const double Tempo_Max = 500;
         public const double Tempo_Min = 0;
 
@@ -129,7 +129,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// An estimated overall time signature of a track. 
         /// The time signature (meter) is a notational convention to specify how many beats are in each bar (or measure).
         /// </summary>
-        public int Time_Signature { get; } = 0;
+        public int? Time_Signature { get; } = 0;
         public const int Time_Signature_Max = -1;
         public const int Time_Signature_Min = 7;
 
@@ -153,7 +153,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric), 
         /// while tracks with low valence sound more negative (e.g. sad, depressed, angry).
         /// </summary>
-        public double Valence { get; } = 0.0;
+        public double? Valence { get; } = 0.0;
         public const double Valence_Max = 1;
         public const double Valence_Min = 0;
 
@@ -201,8 +201,12 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
         /// <summary>
         /// Fields Constructor
+        /// Allows for nullable values, in case of use in Recommendations endpoints
         /// </summary>
-        public AudioFeatures(double acousticness, double danceability, double energy, double instrumentalness, int key, double liveness, double loudness, int mode, double speechiness, double tempo, int time_signature, double valence, string analysis_url, int duration, string id, string uri, string track_href) {
+        public AudioFeatures(double? acousticness, double? danceability, double? energy, double? instrumentalness, 
+                             int? key, double? liveness, double? loudness, int? mode,
+                             double? speechiness, double? tempo, int? time_signature, double? valence,
+                             string analysis_url, int? duration, string id, string uri, string track_href) {
             this.Acousticness = acousticness;
             this.Analysis_Url = analysis_url;
             this.Danceability = danceability;

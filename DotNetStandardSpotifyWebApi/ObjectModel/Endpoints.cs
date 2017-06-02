@@ -1224,7 +1224,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             int maxParams = 100;
             string[] uriArr = uris.Take(maxParams).ToArray();
             Dictionary<string, object> putItems = new Dictionary<string, object>() {
-                {"uris", string.Join(",", uriArr) },
+                {"uris", uriArr },
             };
             if (position.HasValue) {
                 putItems.Add("position", position);
@@ -1247,8 +1247,50 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             }
         }
 
+        /// <summary>
+        /// Remove one or more tracks from a user’s playlist.
+        /// This removes all instances of matching URIs, meaning that duplicates inside a playlist will be completely removed.
+        ///  Removing tracks from a user's public playlist requires authorization of the playlist-modify-public scope; 
+        ///  removing tracks from a private playlist requires the playlist-modify-private scope. See Using Scopes.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="user_id">The user's Spotify user ID.</param>
+        /// <param name="playlist_id">The Spotify ID for the playlist.</param>
+        /// <param name="uris">Spotify URIs to add. NOTE: This is the whole Spotify URI, not just the track id</param>
+        /// <returns></returns>
+        public static async Task<RegularError> RemoveTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<string> uris) {
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
+            int maxParams = 100;
+            IEnumerable<JObject> jobjss = uris.Take(maxParams).Select(x => JObject.FromObject(new Dictionary<string, string>() { { "uri", x } }));
+            JObject messageBody = JObject.FromObject(new Dictionary<string, JToken>() {
+                {"tracks", JArray.FromObject(jobjss) }
+            });
 
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, HttpMethod.Delete);
+            message.Headers.Accept.Clear();
+            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            message.Content = new StringContent(messageBody.ToString());
+            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                string content = await response.Content.ReadAsStringAsync();
+                JObject jobj = JObject.Parse(content);
+                return new RegularError(false, jobj.Value<string>("snapshot_id"));
+            }
+            else {
+                return new RegularError(true, response.ReasonPhrase);
+            }
+
+        }
+
+        //public static async Task<RegularError> RemoveSpecificTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<Tuple<string,string>> uris) {
+
+
+        //}
+
+        //public static async Task<RegularError> RemoveSpecific
+    
+
+        
 
     }
-
 }
