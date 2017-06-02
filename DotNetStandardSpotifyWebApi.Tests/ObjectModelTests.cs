@@ -158,14 +158,28 @@ namespace DotNetStandardSpotifyWebApi.Tests {
 
         }
 
+        [Fact]
         public async void ShouldUnfollowAnArtist() {
             await setupCreds();
-
+            List<string> ids = new List<string>() {
+                Artist_NoFollow
+            };
+            RegularError res = await Endpoints.UnfollowArtists(Creds.Access_token, ids);
+            Assert.False(res.WasError, "Object Error");
+            IReadOnlyList<bool> bools = await Endpoints.CheckCurrentUserFollowsArtists(Creds.Access_token, ids);
+            Assert.False(bools[0], $"Expected to not follow artist {ids[0]}, but do");
         }
 
+        [Fact]
         public async void ShouldUnfollowAUser() {
             await setupCreds();
-
+            List<string> ids = new List<string>() {
+                User_NoFollow
+            };
+            RegularError res = await Endpoints.UnfollowUsers(Creds.Access_token, ids);
+            Assert.False(res.WasError, "Object Error");
+            IReadOnlyList<bool> bools = await Endpoints.CheckCurrentUserFollowsUsers(Creds.Access_token, ids);
+            Assert.False(bools[0], $"Expected to not follow artist {ids[0]}, but do");
         }
 
         public async void ShouldCheckIfUserFollowsUser() {

@@ -11,8 +11,95 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
 {
     public static class Endpoints {
 
-
-        private static async Task<IEnumerable<bool>> DoHttpGetBools(string accessToken, string endpoint) {
+        private static Func<JToken, ISpotifyObject> CreateSpotifyObjectGenerator(Type t) {
+            if (t == typeof(User)) {
+                return (tk) => { return new User(tk); };
+            }
+            else if (t == typeof(Playlist)) {
+                return (tk) => { return new Playlist(tk); };
+            }
+            else if (t == typeof(PlaylistTrack)) {
+                return (tk) => { return new PlaylistTrack(tk); };
+            }
+            else if (t == typeof(Track)) {
+                return (tk) => { return new Track(tk); };
+            }
+            else if (t == typeof(SavedTrack)) {
+                return (tk) => { return new SavedTrack(tk); };
+            }
+            else if (t == typeof(Artist)) {
+                return (tk) => { return new Artist(tk); };
+            }
+            else if (t == typeof(Album)) {
+                return (tk) => { return new Album(tk); };
+            }
+            else if (t == typeof(SavedAlbum)) {
+                return (tk) => { return new SavedAlbum(tk); };
+            }
+            else if (t == typeof(Category)) {
+                return (tk) => { return new Category(tk); };
+            }
+            else if (t == typeof(AudioFeatures)) {
+                return (tk) => { return new AudioFeatures(tk); };
+            }
+            else if (t == typeof(AudioAnalysis)) {
+                return (tk) => { return new AudioAnalysis(tk); };
+            }
+            else if (t == typeof(Paging<Playlist>)) {
+                return (tk) => { return new Paging<Playlist>(tk); };
+            }
+            else if (t == typeof(Paging<PlaylistTrack>)) {
+                return (tk) => { return new Paging<PlaylistTrack>(tk); };
+            }
+            else if (t == typeof(Paging<Album>)) {
+                return (tk) => { return new Paging<Album>(tk); };
+            }
+            else if (t == typeof(Paging<SavedAlbum>)) {
+                return (tk) => { return new Paging<SavedAlbum>(tk); };
+            }
+            else if (t == typeof(Paging<Artist>)) {
+                return (tk) => { return new Paging<Artist>(tk); };
+            }
+            else if (t == typeof(Paging<Track>)) {
+                return (tk) => { return new Paging<Track>(tk); };
+            }
+            else if (t == typeof(Paging<SavedTrack>)) {
+                return (tk) => { return new Paging<SavedTrack>(tk); };
+            }
+            else if (t == typeof(Paging<Category>)) {
+                return (tk) => { return new Paging<Category>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<Artist>)) {
+                return (tk) => { return new CursorBasedPaging<Artist>(tk); };
+            }
+            else if(t == typeof(CursorBasedPaging<Album>)) {
+                return (tk) => { return new CursorBasedPaging<Album>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<SavedAlbum>)) {
+                return (tk) => { return new CursorBasedPaging<SavedAlbum>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<Track>)) {
+                return (tk) => { return new CursorBasedPaging<Track>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<SavedTrack>)) {
+                return (tk) => { return new CursorBasedPaging<SavedTrack>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<Playlist>)) {
+                return (tk) => { return new CursorBasedPaging<Playlist>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<PlaylistTrack>)) {
+                return (tk) => { return new CursorBasedPaging<PlaylistTrack>(tk); };
+            }
+            else if (t == typeof(FeaturedPlaylists)) {
+                return (tk) => { return new FeaturedPlaylists(tk); };
+            }
+            else {
+                return (tk) => {
+                    throw new ArgumentException($"No generator exists for the supplied type: {t}");
+                };
+            }
+        }
+        private static async Task<IReadOnlyList<bool>> DoHttpGetBools(string accessToken, string endpoint) {
             HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken);
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
@@ -32,77 +119,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         }
         private static async Task<T> DoHTTP<T>(string endpoint, string accessToken, string key = "") where T : ISpotifyObject {
 
-            Func<JToken, ISpotifyObject> generator;
-            Type t = typeof(T);
-            if(t == typeof(User)) {
-                generator = (tk) => { return new User(tk); };
-            }
-            else if (t == typeof(Playlist)) {
-                generator = (tk) => { return new Playlist(tk); };
-            }
-            else if (t == typeof(PlaylistTrack)) {
-                generator = (tk) => { return new PlaylistTrack(tk); };
-            }
-            else if (t == typeof(Track)) {
-                generator = (tk) => { return new Track(tk); };
-            }
-            else if (t == typeof(SavedTrack)) {
-                generator = (tk) => { return new SavedTrack(tk); };
-            }
-            else if (t == typeof(Artist)) {
-                generator = (tk) => { return new Artist(tk); };
-            }
-            else if (t == typeof(Album)) {
-                generator = (tk) => { return new Album(tk); };
-            }
-            else if (t == typeof(SavedAlbum)) {
-                generator = (tk) => { return new SavedAlbum(tk); };
-            }
-            else if (t == typeof(Category)) {
-                generator = (tk) => { return new Category(tk); };
-            }
-            else if (t == typeof(AudioFeatures)) {
-                generator = (tk) => { return new AudioFeatures(tk); };
-            }
-            else if (t == typeof(AudioAnalysis)) {
-                generator = (tk) => { return new AudioAnalysis(tk); };
-            }
-            else if (t == typeof(Paging<Playlist>)) {
-                generator = (tk) => { return new Paging<Playlist>(tk); };
-            }
-            else if (t == typeof(Paging<PlaylistTrack>)) {
-                generator = (tk) => { return new Paging<PlaylistTrack>(tk); };
-            }
-            else if (t == typeof(Paging<Album>)) {
-                generator = (tk) => { return new Paging<Album>(tk); };
-            }
-            else if(t == typeof(Paging<SavedAlbum>)){
-                generator = (tk) => { return new Paging<SavedAlbum>(tk); };
-            }
-            else if (t == typeof(Paging<Artist>)) {
-                generator = (tk) => { return new Paging<Artist>(tk); };
-            }
-            else if(t == typeof(Paging<Track>)) {
-                generator = (tk) => { return new Paging<Track>(tk); };
-            }
-            else if (t == typeof(Paging<SavedTrack>)) {
-                generator = (tk) => { return new Paging<SavedTrack>(tk); };
-            }
-            else if(t == typeof(Paging<Category>)) {
-                generator = (tk) => { return new Paging<Category>(tk); };
-            }
-            else if (t == typeof(CursorBasedPaging<Artist>)) {
-                generator = (tk) => { return new CursorBasedPaging<Artist>(tk); };
-            }
-            else if (t == typeof(FeaturedPlaylists)) {
-                generator = (tk) => { return new FeaturedPlaylists(tk); };
-            }
-            else {
-                generator = (tk) => {
-                    throw new ArgumentException($"No generator exists for the supplied type: {typeof(T)}");
-                };
-            }
-
+            Func<JToken, ISpotifyObject> generator = CreateSpotifyObjectGenerator(typeof(T));
             HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken);
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
@@ -118,57 +135,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             }
         }
         private static async Task<IEnumerable<T>> DoSeveralHttp<T>(string endpoint, string type, string accessToken){
-            Func<JToken, ISpotifyObject> generator;
-            Type t = typeof(T);
-            if (t == typeof(Playlist)) {
-                generator = (tk) => { return new Playlist(tk); };
-            }
-            else if (t == typeof(PlaylistTrack)) {
-                generator = (tk) => { return new PlaylistTrack(tk); };
-            }
-            else if (t == typeof(Track)) {
-                generator = (tk) => { return new Track(tk); };
-            }
-            else if (t == typeof(SavedTrack)) {
-                generator = (tk) => { return new SavedTrack(tk); };
-            }
-            else if (t == typeof(Artist)) {
-                generator = (tk) => { return new Artist(tk); };
-            }
-            else if (t == typeof(Album)) {
-                generator = (tk) => { return new Album(tk); };
-            }
-            else if (t == typeof(SavedAlbum)) {
-                generator = (tk) => { return new SavedAlbum(tk); };
-            }
-            else if (t == typeof(Category)) {
-                generator = (tk) => { return new Category(tk); };
-            }
-            else if (t == typeof(AudioFeatures)) {
-                generator = (tk) => { return new AudioFeatures(tk); };
-            }
-            else if (t == typeof(AudioAnalysis)) {
-                generator = (tk) => { return new AudioAnalysis(tk); };
-            }
-            else if (t == typeof(Paging<Playlist>)) {
-                generator = (tk) => { return new Paging<Playlist>(tk); };
-            }
-            else if (t == typeof(Paging<PlaylistTrack>)) {
-                generator = (tk) => { return new Paging<PlaylistTrack>(tk); };
-            }
-            else if (t == typeof(Paging<Album>)) {
-                generator = (tk) => { return new Paging<Album>(tk); };
-            }
-            else if (t == typeof(Paging<Artist>)) {
-                generator = (tk) => { return new Paging<Artist>(tk); };
-            }
-            else {
-                generator = (tk) => {
-                    throw new ArgumentException($"No generator exists for the supplied type: {typeof(T)}");
-                };
-            }
-
-
+            Func<JToken, ISpotifyObject> generator = CreateSpotifyObjectGenerator(typeof(T));
             HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken);
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
@@ -226,6 +193,21 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             return req;
         }
 
+
+        private static async Task<RegularError> DoMethod(string endpoint, string accessToken, string onSuccess, HttpMethod method, Dictionary<string, object> messageBody) {
+            JObject putObject = JObject.FromObject(messageBody);
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, method);
+            message.Headers.Accept.Clear();
+            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            message.Content = new StringContent(putObject.ToString());
+            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                return new RegularError(false, onSuccess);
+            }
+            else {
+                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
+            }
+        }
         /// <summary>
         /// Get Spotify catalog information for a single album.
         /// </summary>
@@ -574,16 +556,17 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             }
         }
 
+
         /// <summary>
-        /// Remove the current user as a follower of one or more artists or other Spotify users.
-        /// Modifying the list of artists or users the current user follows requires authorization of the user-follow-modify scope. See Using Scopes.
+        /// Remove the current user as a follower of one or more artists.
+        /// Modifying the list of artists the current user follows requires authorization of the user-follow-modify scope. See Using Scopes.
         /// </summary>
         /// <param name="accessToken">OAuth access token</param>
-        /// <param name="type">Required. The ID type: either "artist" or "user".</param>
         /// <param name="ids">A list of the artist or the user Spotify IDs.</param>
         /// <returns></returns>
-        public static async Task<RegularError> UnfollowArtistOrUsers(string accessToken, string type, IEnumerable<string> ids) {
+        public static async Task<RegularError> UnfollowArtists(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/following";
+            string type = "artist";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"type", type}
             };
@@ -593,39 +576,72 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             Dictionary<string, object> putItems = new Dictionary<string, object>() {
                 {"ids", ids }
             };
-            JObject putObject = JObject.FromObject(putItems);
-
-            HttpRequestMessage message = WebRequestHelpers.SetupRequest(req, accessToken, HttpMethod.Delete);
-            message.Headers.Accept.Clear();
-            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            message.Content = new StringContent(putObject.ToString());
-            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
-            if (response.IsSuccessStatusCode) {
-                return new RegularError(false, $"successfully unfollowed some {type}");
-            }
-            else {
-                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
-            }
+            string onSuccess = $"successully unfollowed some {type}";
+            return await DoMethod(req, accessToken, onSuccess, HttpMethod.Delete, putItems);
         }
 
+
         /// <summary>
-        /// Check to see if the current user is following one or more artists or other Spotify users.
-        /// Getting details of the artists or users the current user follows requires authorization of the user-follow-read scope. See Using Scopes.
+        /// Remove the current user as a follower of one or more Spotify users.
+        /// Modifying the list of users the current user follows requires authorization of the user-follow-modify scope. See Using Scopes.
         /// </summary>
         /// <param name="accessToken">OAuth access token</param>
-        /// <param name="type">Required. The ID type: either "artist" or "user".</param>
-        /// <param name="ids">Required. A list of the artist or the user Spotify IDs to check.  A maximum of 50 IDs can be sent in one request.</param>
-        /// <returns>List of true or false values, in the same order in which the ids were specified. </returns>
-        public static async Task<IEnumerable<bool>> CheckCurrentUserFollowsArtistsOrUsers(string accessToken, string type, IEnumerable<string> ids) {
-            int maxparams = 50;
-            string endpoint = "https://api.spotify.com/v1/me/following/contains";
+        /// <param name="ids">A list of the artist or the user Spotify IDs.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> UnfollowUsers(string accessToken, IEnumerable<string> ids) {
+            string endpoint = "https://api.spotify.com/v1/me/following";
+            string type = "user";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
-                {"type", type},
-                {"ids", string.Join(",", ids.Take(maxparams)) }
+                {"type", type}
             };
             string options = EncodeRequestParams(paramDict);
             string req = string.Format(endpoint) + options;
-            //TODO
+
+            Dictionary<string, object> putItems = new Dictionary<string, object>() {
+                {"ids", ids }
+            };
+            string onSuccess = $"successully unfollowed some {type}";
+            return await DoMethod(req, accessToken, onSuccess, HttpMethod.Delete, putItems);
+        }
+
+        /// <summary>
+        /// Check to see if the current user is following one or more artists.
+        /// Getting details of the artists the current user follows requires authorization of the user-follow-read scope. See Using Scopes.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="artist_ids">Required. A list of the artist Spotify IDs to check.  A maximum of 50 IDs can be sent in one request.</param>
+        /// <returns>List of true or false values, in the same order in which the ids were specified. </returns>
+        public static async Task<IReadOnlyList<bool>> CheckCurrentUserFollowsArtists(string accessToken, IEnumerable<string> artist_ids) {
+            int maxparams = 50;
+            string endpoint = "https://api.spotify.com/v1/me/following/contains";
+            string type = "artist";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"type", type},
+                {"ids", string.Join(",", artist_ids.Take(maxparams)) }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = string.Format(endpoint) + options;
+            return await DoHttpGetBools(accessToken, req);
+        }
+
+
+        /// <summary>
+        /// Check to see if the current user is following one or more other Spotify users.
+        /// Getting details of the users the current user follows requires authorization of the user-follow-read scope. See Using Scopes.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="user_ids">Required. A list of the user Spotify IDs to check.  A maximum of 50 IDs can be sent in one request.</param>
+        /// <returns>List of true or false values, in the same order in which the ids were specified. </returns>
+        public static async Task<IReadOnlyList<bool>> CheckCurrentUserFollowsUsers(string accessToken, IEnumerable<string> user_ids) {
+            int maxparams = 50;
+            string endpoint = "https://api.spotify.com/v1/me/following/contains";
+            string type = "user";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"type", type},
+                {"ids", string.Join(",", user_ids.Take(maxparams)) }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = string.Format(endpoint) + options;
             return await DoHttpGetBools(accessToken, req);
         }
 
@@ -757,7 +773,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">List of Spotify Ids</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<bool>> CheckUsersSavedTracks(string accessToken, IEnumerable<string> ids) {
+        public static async Task<IReadOnlyList<bool>> CheckUsersSavedTracks(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/tracks/contains";
             int maxParams = 50;
             string[] idArr = ids.Take(maxParams).ToArray();
@@ -846,7 +862,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">List of Spotify Ids</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<bool>> CheckUsersSavedAlbums(string accessToken, IEnumerable<string> ids) {
+        public static async Task<IReadOnlyList<bool>> CheckUsersSavedAlbums(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/albums/contains";
             int maxParams = 50;
             string[] idArr = ids.Take(maxParams).ToArray();
@@ -1282,15 +1298,15 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
 
         }
 
-        //public static async Task<RegularError> RemoveSpecificTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<Tuple<string,string>> uris) {
+        //public static async Task<RegularError> RemoveSpecificTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<Tuple<string, string>> uris) {
 
 
         //}
 
         //public static async Task<RegularError> RemoveSpecific
-    
 
-        
+
+
 
     }
 }
