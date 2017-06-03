@@ -466,5 +466,12 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             await Endpoints.UnfollowAPlaylist(Creds.Access_token, CurrentUserId, p.Id);
         }
 
+        [Fact]
+        public async void ShouldGetUsersRecentlyPlayedTracks() {
+            await setupCreds();
+            CursorBasedPaging<PlayHistory> page = await Endpoints.GetCurrentUsersRecentlyPlayedTracks(Creds.Access_token);
+            Assert.False(page.WasError, "Object Error");
+        }
+
     }
 }

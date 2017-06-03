@@ -1010,6 +1010,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         //        
         //    }
         public static async Task<Recommendation> GetRecommendationsBasedOnSeed(string accessToken) {
+            await Task.Delay(1);
             throw new NotImplementedException("NYI");
         }
 
@@ -1411,14 +1412,17 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         }
 
         public static async Task<RegularError> RemoveSpecificOccurranceOfTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<Tuple<string, string>> uris) {
+            await Task.Delay(1);
             throw new NotImplementedException("NYI");
         }
 
         public static async Task<RegularError> RemoveSpecificOccuranceInSpecificSnapshotOfPlaylist(string accessToken, string user_id, string playlist_id, string snapshot_id) {
+            await Task.Delay(1);
             throw new NotImplementedException("NYI");
         }
 
         public static async Task<RegularError> RemoveTrackAtPositionInPlaylistSnapshot(string accessToken, string user_id, string playlist_id, string snapshot_id) {
+            await Task.Delay(1)
             throw new NotImplementedException("NYI");
         }
 
@@ -1509,9 +1513,44 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             }
         }
 
-        //public static async Task<CursorBasedPaging<PlayHistory>> GetCurrentUsersRecentlyPlayedTracks() {
-
-        //}
+        //TODO can't test until we get new refesh token form Lyrically
+        /// <summary>
+        /// Get tracks from the current user’s recently played tracks.
+        /// 
+        /// Returns the most recent 50 tracks played by a user. Note that a track currently playing will not be visible in play history until it has completed. 
+        /// A track must be played for more than 30 seconds to be included in play history.
+        /// 
+        /// Any tracks listened to while the user had “Private Session” enabled in their client will not be returned in the list of recently played tracks.
+        /// 
+        /// The endpoint uses a bidirectional cursor for paging. 
+        /// Follow the next field with the before parameter to move back in time, or use the after parameter to move forward in time. 
+        /// If you supply no before or after parameter, the endpoint will return the most recently played songs, and the next link will page back in time.
+        /// 
+        ///  The access token must have the user-read-recently-played scope authorized in order to read the user's recently played track.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="limit">Optional. The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50. </param>
+        /// <param name="after">Optional. A Unix timestamp in milliseconds. Returns all items after (but not including) this cursor position. If after is specified, before must not be specified.</param>
+        /// <param name="before">Optional. A Unix timestamp in milliseconds. Returns all items before (but not including) this cursor position. If before is specified, after must not be specified.</param>
+        /// <returns></returns>
+        public static async Task<CursorBasedPaging<PlayHistory>> GetCurrentUsersRecentlyPlayedTracks(string accessToken, int limit = 20, long? after = null, long? before = null ) {
+            if(after.HasValue && before.HasValue) {
+                throw new ArgumentException("After and Before cannot both be specified. Please only specify one or the other.");
+            }
+            string endpoint = "https://api.spotify.com/v1/me/player/recently-played";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"limit", limit }
+            };
+            if (after.HasValue) {
+                paramDict.Add("after", after);
+            }
+            if (before.HasValue) {
+                paramDict.Add("before", before);
+            }
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<CursorBasedPaging<PlayHistory>>(req, accessToken);
+        }
 
 
 

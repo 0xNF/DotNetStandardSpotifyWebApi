@@ -60,6 +60,9 @@ namespace DotNetStandardSpotifyWebApi.Authorization {
         public readonly static SpotifyScopeEnum USER_READ_BIRTHDATE = new SpotifyScopeEnum("user-read-birthdate", "Read access to the user's birthdate.", "Receive your birthdate");
         public readonly static SpotifyScopeEnum USER_READ_EMAIL = new SpotifyScopeEnum("user-read-email", "Read access to user’s email address.", "Get your real email address");
         public readonly static SpotifyScopeEnum USER_TOP_READ = new SpotifyScopeEnum("user-top-read", "Read access to a user's top artists and tracks", "Read your top artists and tracks");
+        public readonly static SpotifyScopeEnum USER_READ_PLAYBACK_STATE = new SpotifyScopeEnum("user-read-playback-state", "n/a", "n/a");
+        public readonly static SpotifyScopeEnum USER_MODIFY_PLAYBACK_STATE = new SpotifyScopeEnum("user-modify-playback-state", "n/a", "n/a");
+        public readonly static SpotifyScopeEnum USER_READ_RECENTLY_PLAYED = new SpotifyScopeEnum("user-read-recently-played", "n/a", "n/a");
         #endregion
 
     }
