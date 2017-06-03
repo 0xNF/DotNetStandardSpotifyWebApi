@@ -11,7 +11,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
 {
     public static class Endpoints {
 
-        private static Func<JToken, ISpotifyObject> CreateSpotifyObjectGenerator(Type t) {
+        internal static Func<JToken, ISpotifyObject> CreateSpotifyObjectGenerator(Type t) {
             if (t == typeof(User)) {
                 return (tk) => { return new User(tk); };
             }
@@ -45,6 +45,15 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             else if (t == typeof(AudioAnalysis)) {
                 return (tk) => { return new AudioAnalysis(tk); };
             }
+            else if (t == typeof(Context)) {
+                return (tk) => { return new Context(tk); };
+            }
+            else if (t == typeof(PlayHistory)) {
+                return (tk) => { return new PlayHistory(tk); };
+            }
+            else if (t == typeof(Playback)) {
+                return (tk) => { return new Playback(tk); };
+            }
             else if (t == typeof(Paging<Playlist>)) {
                 return (tk) => { return new Paging<Playlist>(tk); };
             }
@@ -69,6 +78,15 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             else if (t == typeof(Paging<Category>)) {
                 return (tk) => { return new Paging<Category>(tk); };
             }
+            else if (t == typeof(Paging<Context>)) {
+                return (tk) => { return new Paging<Context>(tk); };
+            }
+            else if (t == typeof(Paging<PlayHistory>)) {
+                return (tk) => { return new Paging<PlayHistory>(tk); };
+            }
+            else if (t == typeof(Paging<Playback>)) {
+                return (tk) => { return new Paging<Playback>(tk); };
+            }
             else if (t == typeof(CursorBasedPaging<Artist>)) {
                 return (tk) => { return new CursorBasedPaging<Artist>(tk); };
             }
@@ -89,6 +107,15 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             }
             else if (t == typeof(CursorBasedPaging<PlaylistTrack>)) {
                 return (tk) => { return new CursorBasedPaging<PlaylistTrack>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<Context>)) {
+                return (tk) => { return new CursorBasedPaging<Context>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<PlayHistory>)) {
+                return (tk) => { return new CursorBasedPaging<PlayHistory>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<Playback>)) {
+                return (tk) => { return new CursorBasedPaging<Playback>(tk); };
             }
             else if (t == typeof(FeaturedPlaylists)) {
                 return (tk) => { return new FeaturedPlaylists(tk); };
@@ -194,12 +221,14 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         }
 
 
-        private static async Task<RegularError> DoMethod(string endpoint, string accessToken, string onSuccess, HttpMethod method, Dictionary<string, object> messageBody) {
+        private static async Task<RegularError> DoMethod(string endpoint, string accessToken, string onSuccess, HttpMethod method, Dictionary<string, object> messageBody=null) {
             JObject putObject = JObject.FromObject(messageBody);
             HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, method);
-            message.Headers.Accept.Clear();
-            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            message.Content = new StringContent(putObject.ToString());
+            if(messageBody != null) {
+                message.Headers.Accept.Clear();
+                message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                message.Content = new StringContent(putObject.ToString());
+            }
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
                 return new RegularError(false, onSuccess);
@@ -670,7 +699,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             Dictionary<string, object> putItems = new Dictionary<string, object>() {
                 {"public", isPublic }
             };
-            return await DoMethod(endpoint, accessToken, $"successfully follows play list {playlist_id}", HttpMethod.Put, putItems);
+            return await DoMethod(endpoint, accessToken, $"successfully follows playlist {playlist_id}", HttpMethod.Put, putItems);
         }
 
         /// <summary>
@@ -980,9 +1009,73 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         //                    "", int.MaxValue, "", "", "");
         //        
         //    }
+        public static async Task<Recommendation> GetRecommendationsBasedOnSeed(string accessToken) {
+            throw new NotImplementedException("NYI");
+        }
 
         //TODO Search
         //Also complicated
+        //What to do about the query param.
+        public static async Task<Paging<Artist>> SearchArtists(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
+            string endpoint = "https://api.spotify.com/v1/search";
+            string type = "artist";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"q", query },
+                {"type", type },
+                {"market", market },
+                {"limit",limit },
+                {"offset",offset }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<Paging<Artist>>(req, accessToken, "artists");
+            throw new NotImplementedException("NYI");
+        }
+        public static async Task<Paging<Album>> SearchAlbums(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
+            string endpoint = "https://api.spotify.com/v1/search";
+            string type = "album";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"q", query },
+                {"type", type },
+                {"market", market },
+                {"limit",limit },
+                {"offset",offset }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<Paging<Album>>(req, accessToken, "albums");
+            throw new NotImplementedException("NYI");
+        }
+        public static async Task<Paging<Playlist>> SearchPlaylists(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
+            string endpoint = "https://api.spotify.com/v1/search";
+            string type = "playlist";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"q", query },
+                {"type", type },
+                {"market", market },
+                {"limit",limit },
+                {"offset",offset }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<Paging<Playlist>>(req, accessToken, "playlists");
+            throw new NotImplementedException("NYI");
+        }
+        public static async Task<Paging<Track>> SearchTracks(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
+            string endpoint = "https://api.spotify.com/v1/search";
+            string type = "track";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"q", query },
+                {"type", type },
+                {"market", market },
+                {"limit",limit },
+                {"offset",offset }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<Paging<Track>>(req, accessToken, "tracks");
+            throw new NotImplementedException("NYI");
+        }
 
 
         /// <summary>
@@ -1136,7 +1229,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         /// <param name="limit">Optional. The maximum number of tracks to return. Default: 100. Minimum: 1. Maximum: 100. </param>
         /// <param name="offset">Optional. The index of the first track to return. Default: 0 (the first object). </param>
         /// <returns></returns>
-        public static async Task<Paging<Track>> GetAPlaylistsTracks(string accessToken, string user_id, string playlist_id, string fields = "", string market = "", int limit = 20, int offset = 0) {
+        public static async Task<Paging<PlaylistTrack>> GetAPlaylistsTracks(string accessToken, string user_id, string playlist_id, string fields = "", string market = "", int limit = 20, int offset = 0) {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"fields",fields},
@@ -1146,7 +1239,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             };
             string options = EncodeRequestParams(paramDict);
             string req = endpoint + options;
-            return await DoHTTP<Paging<Track>>(req, accessToken);
+            return await DoHTTP<Paging<PlaylistTrack>>(req, accessToken);
         }
 
         /// <summary>
@@ -1317,13 +1410,108 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
 
         }
 
-        //public static async Task<RegularError> RemoveSpecificTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<Tuple<string, string>> uris) {
+        public static async Task<RegularError> RemoveSpecificOccurranceOfTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<Tuple<string, string>> uris) {
+            throw new NotImplementedException("NYI");
+        }
 
+        public static async Task<RegularError> RemoveSpecificOccuranceInSpecificSnapshotOfPlaylist(string accessToken, string user_id, string playlist_id, string snapshot_id) {
+            throw new NotImplementedException("NYI");
+        }
+
+        public static async Task<RegularError> RemoveTrackAtPositionInPlaylistSnapshot(string accessToken, string user_id, string playlist_id, string snapshot_id) {
+            throw new NotImplementedException("NYI");
+        }
+
+        /// <summary>
+        /// Reorder a track or a group of tracks in a playlist.
+        /// 
+        /// When reordering tracks, the timestamp indicating when they were added and the user who added them will be kept untouched. 
+        /// In addition, the users following the playlists won’t be notified about changes in the playlists when the tracks are reordered.
+        /// 
+        ///  Reordering tracks in the current user's public playlists requires authorization of the playlist-modify-public scope; 
+        ///  reordering tracks in the current user's private playlist (including collaborative playlists) requires the playlist-modify-private scope. 
+        ///  See Using Scopes.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="user_id">The user's Spotify user ID.</param>
+        /// <param name="playlist_id">The Spotify ID for the playlist.</param>
+        /// <param name="range_start">Required. The position of the first track to be reordered.</param>
+        /// <param name="insert_before">
+        /// Optional. The amount of tracks to be reordered. Defaults to 1 if not set.
+        /// The range of tracks to be reordered begins from the range_start position, and includes the range_length subsequent tracks.
+        /// </param>
+        /// <param name="range_length">
+        /// Required. The position where the tracks should be inserted. 
+        ///  To reorder the tracks to the end of the playlist, simply set insert_before to the position after the last track.
+        ///  </param>
+        /// <param name="snapshot_id">Optional. The playlist's snapshot ID against which you want to make the changes. </param>
+        /// <returns></returns>
+        public static async Task<RegularError> ReorderPlaylistsTracks(string accessToken, string user_id, string playlist_id, int range_start, int insert_before, int range_length = 1, string snapshot_id = "") {
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
+            Dictionary<string, object> messageBody = new Dictionary<string, object>() {
+                {"range_start", range_start },
+                {"range_length", range_length },
+                {"insert_before", insert_before },
+            };
+            if (!string.IsNullOrWhiteSpace(snapshot_id)) {
+                messageBody.Add("snapshot_id", snapshot_id);
+            }
+
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, HttpMethod.Put);
+            message.Headers.Accept.Clear();
+            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            message.Content = new StringContent(JObject.FromObject(messageBody).ToString());
+            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                string content = await response.Content.ReadAsStringAsync();
+                JObject jobj = JObject.Parse(content);
+                return new RegularError(false, jobj.Value<string>("snapshot_id"));
+            }
+            else {
+                return new RegularError(true, response.ReasonPhrase);
+            }
+
+        }
+
+        /// <summary>
+        /// Replace all the tracks in a playlist, overwriting its existing tracks.
+        /// This powerful request can be useful for replacing tracks, re-ordering existing tracks, or clearing the playlist.
+        /// 
+        /// Setting tracks in the current user's public playlists requires authorization of the playlist-modify-public scope;
+        /// setting tracks in the current user's private playlist (including collaborative playlists) requires the playlist-modify-private scope.
+        /// See Using Scopes.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="user_id">The user's Spotify user ID.</param>
+        /// <param name="playlist_id">The Spotify ID for the playlist.</param>
+        /// <param name="uris">A list of Spotify URIs to set. Maximum of 100 per request</param>
+        /// <returns></returns>
+        public static async Task<RegularError> ReplacePlaylistTracks(string accessToken, string user_id, string playlist_id, IEnumerable<string> uris) {
+            int maxParams = 100;
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
+            Dictionary<string, object> messageBody = new Dictionary<string, object>() {
+                {"uris", JArray.FromObject(uris.Take(maxParams)) }
+            };
+
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, HttpMethod.Put);
+            message.Headers.Accept.Clear();
+            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            JObject mbody = JObject.FromObject(messageBody);
+            message.Content = new StringContent(mbody.ToString());
+            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                string content = await response.Content.ReadAsStringAsync();
+                JObject jobj = JObject.Parse(content);
+                return new RegularError(false, jobj.Value<string>("snapshot_id"));
+            }
+            else {
+                return new RegularError(true, response.ReasonPhrase);
+            }
+        }
+
+        //public static async Task<CursorBasedPaging<PlayHistory>> GetCurrentUsersRecentlyPlayedTracks() {
 
         //}
-
-        //public static async Task<RegularError> RemoveSpecific
-
 
 
 

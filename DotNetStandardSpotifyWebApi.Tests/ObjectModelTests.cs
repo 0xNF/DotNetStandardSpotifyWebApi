@@ -369,7 +369,7 @@ namespace DotNetStandardSpotifyWebApi.Tests {
         [Fact]
         public async void ShouldGetAPlaylistsTracks() {
             await setupCreds();
-            Paging<Track> page = await Endpoints.GetAPlaylistsTracks(Creds.Access_token, CurrentUserId, Playlist_Follow);
+            Paging<PlaylistTrack> page = await Endpoints.GetAPlaylistsTracks(Creds.Access_token, CurrentUserId, Playlist_Follow);
             Assert.False(page.WasError, "Object Error");
             Assert.True(page.Total == 5, $"Expected 5 tracks, got {page.Total}");
         }
@@ -410,6 +410,60 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             string pid = "6cFJgP266Kp31iY8ewuZrv"; // TEST playlist
             RegularError res = await Endpoints.RemoveTracksFromPlaylist(Creds.Access_token, CurrentUserId, pid, uris);
             Assert.False(res.WasError, "Failed to delete from playlist");
+        }
+
+        [Fact]
+        public async void ShouldReorderAPlaylistsTracks() {
+            await setupCreds();
+            //First create a new playlist
+            Playlist p = await Endpoints.CreateAPlaylist(Creds.Access_token, CurrentUserId, "Test Reordering");
+            //Then Add songs in a certain order
+            List<string> uris = new List<string>() {
+                "spotify:track:7rXhnFjG74YKMgq0R89Bpz",//Papi
+                "spotify:track:1TG5DvegcKAJOuKmKCKOIU",//Over You
+                "spotify:track:3GK0gr4QMLeXSm50eCBWp8", //Dance - Oliver Remix
+            };
+            RegularError AddTrackError = await Endpoints.AddTracksToPlaylist(Creds.Access_token, CurrentUserId, p.Id, uris);
+            Assert.False(AddTrackError.WasError, "Failed to add tracks to playlist");
+            //Then reorder
+            RegularError  ReorderError = await Endpoints.ReorderPlaylistsTracks(Creds.Access_token, CurrentUserId, p.Id, 0, 3); //Should move Papi to end
+            Assert.False(ReorderError.WasError, "Failed to issue reorder command");
+            //Then check the reorder
+            Paging<PlaylistTrack> page = await Endpoints.GetAPlaylistsTracks(Creds.Access_token, CurrentUserId, p.Id);
+            Assert.True(page.Items[0].Track.Uri.Equals(uris[1]), "Expected the uris to be different.");
+            Assert.True(page.Items[1].Track.Uri.Equals(uris[2]), "Expected the uris to be different.");
+            Assert.True(page.Items[2].Track.Uri.Equals(uris[0]), "Expected the uris to be different.");
+            //Then unfollow the playlist
+            await Endpoints.UnfollowAPlaylist(Creds.Access_token, CurrentUserId, p.Id);
+        }
+
+        [Fact]
+        public async void ShouldReplaceAPlaylistsTracks() {
+            await setupCreds();
+            //First create a new playlist
+            Playlist p = await Endpoints.CreateAPlaylist(Creds.Access_token, CurrentUserId, "Test Replacement");
+            //Then Add songs in a certain order
+            List<string> uris = new List<string>() {
+                "spotify:track:7rXhnFjG74YKMgq0R89Bpz",//Papi
+                "spotify:track:1TG5DvegcKAJOuKmKCKOIU",//Over You
+                "spotify:track:3GK0gr4QMLeXSm50eCBWp8", //Dance - Oliver Remix
+            };
+            RegularError AddTrackError = await Endpoints.AddTracksToPlaylist(Creds.Access_token, CurrentUserId, p.Id, uris);
+            Assert.False(AddTrackError.WasError, "Failed to add tracks to playlist");
+            //Then remove every song
+            RegularError ReorderError = await Endpoints.ReplacePlaylistTracks(Creds.Access_token, CurrentUserId, p.Id, new List<string>() { "spotify:track:1TG5DvegcKAJOuKmKCKOIU"}); //Should have only Over You in it
+            Assert.False(ReorderError.WasError, "Failed to issue reorder command at first");
+            //Then check the reorder
+            Paging<PlaylistTrack> page = await Endpoints.GetAPlaylistsTracks(Creds.Access_token, CurrentUserId, p.Id);
+            Assert.True(page.Total == 1, $"Expected there to be 1 item, but playlist still has {uris.Count}.");
+            //Test for clearing the list
+            ReorderError = await Endpoints.ReplacePlaylistTracks(Creds.Access_token, CurrentUserId, p.Id, new List<string>()); //Should now be empty
+            Assert.False(ReorderError.WasError, "Failed to issue replace command at second");
+            //Then check the reorder
+            page = await Endpoints.GetAPlaylistsTracks(Creds.Access_token, CurrentUserId, p.Id);
+            Assert.True(page.Total == 0, $"Expected there to be no items, but playlist still has {uris.Count}.");
+            //Then unfollow the playlist
+            await Endpoints.UnfollowAPlaylist(Creds.Access_token, CurrentUserId, p.Id);
         }
 
     }

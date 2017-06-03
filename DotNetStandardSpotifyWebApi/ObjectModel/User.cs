@@ -300,6 +300,31 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         private const string api_SetRepeat = baseUrl + "/v1/me/player/repeat";
         private const string api_SetVolume = baseUrl + "/v1/me/player/volume";
         private const string api_SetShuffle = baseUrl + "/v1/me/player/shuffle";
+
+        /// <summary>
+        /// Empty Constructor
+        /// </summary>
+        public Playback() {
+
+        }
+
+        /// <summary>
+        /// Error Constructor
+        /// </summary>
+        /// <param name="wasError"></param>
+        /// <param name="errorMessage"></param>
+        public Playback(bool wasError, string errorMessage) {
+            WasError = wasError;
+            ErrorMessage = errorMessage;
+        }
+
+        /// <summary>
+        /// JToken Constructor
+        /// </summary>
+        /// <param name="token"></param>
+        public Playback(JToken token) {
+
+        }
     }
 
 }

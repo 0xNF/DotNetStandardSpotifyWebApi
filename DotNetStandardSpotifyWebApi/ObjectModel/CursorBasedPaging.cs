@@ -76,43 +76,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 Cursors = new Cursor(cobj);
             }
 
-            Func<JObject, ISpotifyObject> generator;
-            Type t = typeof(T);
-            //if (t == typeof(Playlist)) {
-            //    generator = (tk) => { return new Playlist(tk); };
-            //}
-            //else if (t == typeof(PlaylistTrack)) {
-            //    generator = (tk) => { return new PlaylistTrack(tk); };
-            //}
-            //else if (t == typeof(Track)) {
-            //    generator = (tk) => { return new Track(tk); };
-            //}
-            //else if (t == typeof(SavedTrack)) {
-            //    generator = (tk) => { return new SavedTrack(tk); };
-            //}
-            if (t == typeof(Artist)) {
-                generator = (tk) => { return new Artist(tk); };
-            }
-            //else if (t == typeof(Album)) {
-            //    generator = (tk) => { return new Album(tk); };
-            //}
-            //else if (t == typeof(SavedAlbum)) {
-            //    generator = (tk) => { return new SavedAlbum(tk); };
-            //}
-            //else if (t == typeof(Category)) {
-            //    generator = (tk) => { return new Category(tk); };
-            //}
-            //else if (t == typeof(AudioFeatures)) {
-            //    generator = (tk) => { return new AudioFeatures(tk); };
-            //}
-            //else if (t == typeof(AudioAnalysis)) {
-            //    generator = (tk) => { return new AudioAnalysis(tk); };
-            //}
-            else {
-                generator = (tk) => {
-                    throw new ArgumentException("Something happened while generating the paging item!");
-                };
-            }
+            Func<JObject, ISpotifyObject> generator = Endpoints.CreateSpotifyObjectGenerator(typeof(T));
 
             JArray jarr = token.Value<JArray>("items");
             if (jarr != null) {
