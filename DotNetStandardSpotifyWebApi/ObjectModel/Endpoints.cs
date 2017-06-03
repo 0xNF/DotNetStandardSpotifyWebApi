@@ -54,6 +54,12 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             else if (t == typeof(Playback)) {
                 return (tk) => { return new Playback(tk); };
             }
+            else if (t == typeof(Device)) {
+                return (tk) => { return new Device(tk); };
+            }
+            else if (t == typeof(CurrentlyPlayingContext)) {
+                return (tk) => { return new CurrentlyPlayingContext(tk); };
+            }
             else if (t == typeof(Paging<Playlist>)) {
                 return (tk) => { return new Paging<Playlist>(tk); };
             }
@@ -87,10 +93,13 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             else if (t == typeof(Paging<Playback>)) {
                 return (tk) => { return new Paging<Playback>(tk); };
             }
+            else if (t == typeof(Paging<Device>)) {
+                return (tk) => { return new Paging<Device>(tk); };
+            }
             else if (t == typeof(CursorBasedPaging<Artist>)) {
                 return (tk) => { return new CursorBasedPaging<Artist>(tk); };
             }
-            else if(t == typeof(CursorBasedPaging<Album>)) {
+            else if (t == typeof(CursorBasedPaging<Album>)) {
                 return (tk) => { return new CursorBasedPaging<Album>(tk); };
             }
             else if (t == typeof(CursorBasedPaging<SavedAlbum>)) {
@@ -116,6 +125,9 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             }
             else if (t == typeof(CursorBasedPaging<Playback>)) {
                 return (tk) => { return new CursorBasedPaging<Playback>(tk); };
+            }
+            else if (t == typeof(CursorBasedPaging<Device>)) {
+                return (tk) => { return new CursorBasedPaging<Device>(tk); };
             }
             else if (t == typeof(FeaturedPlaylists)) {
                 return (tk) => { return new FeaturedPlaylists(tk); };
@@ -145,7 +157,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
 
         }
         private static async Task<T> DoHTTP<T>(string endpoint, string accessToken, string key = "") where T : ISpotifyObject {
-
+                
             Func<JToken, ISpotifyObject> generator = CreateSpotifyObjectGenerator(typeof(T));
             HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken);
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
@@ -1422,7 +1434,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         }
 
         public static async Task<RegularError> RemoveTrackAtPositionInPlaylistSnapshot(string accessToken, string user_id, string playlist_id, string snapshot_id) {
-            await Task.Delay(1)
+            await Task.Delay(1);
             throw new NotImplementedException("NYI");
         }
 
@@ -1513,7 +1525,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             }
         }
 
-        //TODO can't test until we get new refesh token form Lyrically
         /// <summary>
         /// Get tracks from the current user’s recently played tracks.
         /// 
@@ -1550,6 +1561,34 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             string options = EncodeRequestParams(paramDict);
             string req = endpoint + options;
             return await DoHTTP<CursorBasedPaging<PlayHistory>>(req, accessToken);
+        }
+
+        public static async Task<IReadOnlyList<Device>> GetUsersAvailableDevices(string accessToken) {
+            string endpoint = "https://api.spotify.com/v1/me/player/devices";
+
+            HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken);
+            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                List<Device> devices = new List<Device>();
+                JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
+                JArray jarr = token.Value<JArray>("devices");
+                foreach(JToken jobj in jarr) {
+                    Device d = new Device(jobj);
+                    devices.Add(d);
+                }
+                return devices;
+            }
+            throw new HttpRequestException("Failed to get users devices. See inner exception for more details", new Exception(response.ReasonPhrase));
+        }
+
+        public static async Task<CurrentlyPlayingContext> GetUsersCurrentlyPlayingInformation(string accessToken, string market = "") {
+            string endpoint = "https://api.spotify.com/v1/me/player";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"market", market }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoHTTP<CurrentlyPlayingContext>(req, accessToken);
         }
 
 

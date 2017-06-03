@@ -473,5 +473,19 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             Assert.False(page.WasError, "Object Error");
         }
 
+        [Fact]
+        public async void ShouldGetUsersAvailableDevices() {
+            await setupCreds();
+            IReadOnlyList<Device> devices = await Endpoints.GetUsersAvailableDevices(Creds.Access_token);
+            Assert.True(devices.Any(), "Expected at least 1 device, got none");
+        }
+
+        [Fact]
+        public async void ShouldGetCurrentlyPlayingSong() {
+            await setupCreds();
+            CurrentlyPlayingContext current = await Endpoints.GetUsersCurrentlyPlayingInformation(Creds.Access_token);
+            Assert.False(current.WasError, "Object Error");
+        }
+
     }
 }
