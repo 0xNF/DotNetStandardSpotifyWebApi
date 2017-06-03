@@ -542,5 +542,27 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             RegularError res = await Endpoints.SeekToPositionInCurrentlyPlayingTrack(Creds.Access_token, 0);
             Assert.False(res.WasError, $"Expected to seek to 0, but failed. See: {res.Message}");
         }
+
+        [Fact]
+        public async void ShouldTurnRepeatTrackOn() {
+            await setupCreds();
+            RegularError res = await Endpoints.SetRepeatModeOnUsersPlayback(Creds.Access_token, RepeatEnum.TRACK);
+            Assert.False(res.WasError, $"Expected to set repeat, but failed. See: {res.Message}");
+        }
+
+        [Fact]
+        public async void ShouldTurnVolumeDown() {
+            await setupCreds();
+            RegularError res = await Endpoints.SetVolumeOnUsersPlayback(Creds.Access_token, 0);
+            Assert.False(res.WasError, $"Expected to set volume, but failed. See: {res.Message}");
+        }
+
+        [Fact]
+        public async void ShouldSetShuffleToTrue() {
+            await setupCreds();
+            RegularError res = await Endpoints.SetShuffleOnPlayback(Creds.Access_token, true);
+            Assert.False(res.WasError, $"Expected to set shuffle, but failed. See: {res.Message}");
+        }
+
     }
 }

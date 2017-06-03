@@ -1743,6 +1743,9 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
         /// <returns></returns>
         public static async Task<RegularError> SeekToPositionInCurrentlyPlayingTrack(string accessToken, long position_ms, string device_id = "") {
+            if (position_ms < 0) {
+                throw new ArgumentException("position_ms must be a positive int or long.");
+            }
             string endpoint = "https://api.spotify.com/v1/me/player/seek";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"position_ms", position_ms },
@@ -1751,6 +1754,63 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             string options = EncodeRequestParams(paramDict);
             string req = endpoint + options;
             return await DoMethod(req, accessToken, $"Seeked to {position_ms}", HttpMethod.Put);
+        }
+
+        /// <summary>
+        /// Set the repeat mode for the user’s playback. Options are repeat-track, repeat-context, and off.
+        /// </summary>
+        /// <param name="accessToken">Oauth access token</param>
+        /// <param name="position_ms">Required. The position in milliseconds to seek to. Must be a positive number. Passing in a position that is greater than the length of the track will cause the player to start playing the next song.</param>
+        /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> SetRepeatModeOnUsersPlayback(string accessToken, RepeatEnum state, string device_id = "") {
+            string endpoint = "https://api.spotify.com/v1/me/player/repeat";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"state", state.Name},
+                {"device_id", device_id }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoMethod(req, accessToken, $"Switched repeat to {state.ToString()}", HttpMethod.Put);
+        }
+
+        /// <summary>
+        /// Set the volume for the user’s current playback device.
+        /// </summary>
+        /// <param name="accessToken">Oauth access token</param>
+        /// <param name="position_ms">Required. Integer. The volume to set. Must be a value from 0 to 100 inclusive.</param>
+        /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> SetVolumeOnUsersPlayback(string accessToken, int volume_percent, string device_id = "") {
+            if(volume_percent < 0 || volume_percent > 100) {
+                throw new ArgumentException("Volume percent must be a positive integer between 0 and 100, inclusive.");
+            }
+            string endpoint = "https://api.spotify.com/v1/me/player/volume";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"volume_percent", volume_percent},
+                {"device_id", device_id }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoMethod(req, accessToken, $"Turned volume to {volume_percent}", HttpMethod.Put);
+        }
+
+        /// <summary>
+        /// Toggle shuffle on or off for user’s playback.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="shuffle">True: Shuffle On. False: Shuffle off</param>
+        /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> SetShuffleOnPlayback(string accessToken, bool shuffle, string device_id = "") {
+            string endpoint = "https://api.spotify.com/v1/me/player/shuffle";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"state", shuffle},
+                {"device_id", device_id }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoMethod(req, accessToken, $"Set shuffle to {shuffle}", HttpMethod.Put);
         }
     }
 }
