@@ -564,6 +564,20 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             RegularError res = await Endpoints.SetShuffleOnPlayback(Creds.Access_token, true);
             Assert.False(res.WasError, $"Expected to set shuffle, but failed. See: {res.Message}");
         }
+        
+        [Fact]
+        public async void ShouldTransferPaybackSession() {
+            await SetupCredentials();
+            IReadOnlyCollection<Device> devices = await Endpoints.GetUsersAvailableDevices(Creds.Access_token);
+            if(devices.Count > 1) {
+                Device active = devices.Where(x => x.Is_Active).First();
+                Device inactive = devices.Where(x => !x.Is_Active && !x.Is_Restricted).FirstOrDefault();
+                if(inactive != null) {
+                    RegularError res = await Endpoints.TransferUsersPlayback(Creds.Access_token, new List<string>() { inactive.Id });
+                    Assert.False(res.WasError, "expected to transfer playback, but failed");
+                }
+            }
+        }
 
     }
 }
