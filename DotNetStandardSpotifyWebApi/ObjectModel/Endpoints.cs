@@ -233,9 +233,9 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
 
         private static async Task<RegularError> DoMethod(string endpoint, string accessToken, string onSuccess, HttpMethod method, Dictionary<string, object> messageBody=null) {
-            JObject putObject = JObject.FromObject(messageBody);
             HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, method);
             if(messageBody != null && messageBody.Any()) {
+                JObject putObject = JObject.FromObject(messageBody);
                 message.Headers.Accept.Clear();
                 message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 message.Content = new StringContent(putObject.ToString());
@@ -1623,7 +1623,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
         /// <param name="context_uri">Spotify URI of the context to play. Valid contexts are albums, artists & playlists. NOT TRACKS. Please use a singleton uris list instead.</param>
         /// <param name="uris">Optional: List of the Spotify track URIs to play.</param>
-        /// <param name="offset">Optional. Indicates from where in the context playback should start. Only available when context_uri corresponds to an album or playlist object, or when the uris parameter is used.</param>
+        /// <param name="offset">Optional.String Or Int. Indicates from where in the context playback should start. Only available when context_uri corresponds to an album or playlist object, or when the uris parameter is used.</param>
         /// <returns></returns>
         public static async Task<RegularError> StartOrResumePlayback(string accessToken, string device_id="", string context_uri = "", IEnumerable<string> uris = null, object offset= null) {
             if(!string.IsNullOrEmpty(context_uri) && uris != null) {
@@ -1671,6 +1671,25 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 }
             }
             return await DoMethod(endpoint, accessToken, $"Toggled playback on {device_id}.", HttpMethod.Put, messageBody);
+        }
+
+        /// <summary>
+        /// Pause playback on the user’s account.
+        /// The access token must have been issued on behalf of a premium user. 
+        /// The access token must have the user-modify-playback-state scope authorized in order to control playback.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> PauseUsersPlayback(string accessToken, string device_id = "") {
+            string endpoint = "https://api.spotify.com/v1/me/player/pause";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"device_id", device_id }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoMethod(req, accessToken, "Paused playback", HttpMethod.Put);
+
         }
     }
 }

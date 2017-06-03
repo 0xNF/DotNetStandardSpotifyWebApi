@@ -481,7 +481,6 @@ namespace DotNetStandardSpotifyWebApi.Tests {
 
         [Fact]
         public async void ShouldToggleUsersPlayback() {
-            //TODO Does not restart playback, and does not take a new song to play. Fix later.
             await setupCreds();
             //First get current playback devices
             IReadOnlyList<Device> devices = await Endpoints.GetUsersAvailableDevices(Creds.Access_token);
@@ -502,7 +501,6 @@ namespace DotNetStandardSpotifyWebApi.Tests {
 
         [Fact]
         public async void ShouldStartPlaybackAtSecondOffset() {
-            //TODO Does not restart playback, and does not take a new song to play. Fix later.
             await setupCreds();
             //First get current playback devices
             IReadOnlyList<Device> devices = await Endpoints.GetUsersAvailableDevices(Creds.Access_token);
@@ -514,7 +512,13 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             //Start playback
             RegularError reg = await Endpoints.StartOrResumePlayback(Creds.Access_token, devices[0].Id, uris:TrackUris, offset:1 );
             Assert.False(reg.WasError, "Expected no error, got an error");
+        }
 
+        [Fact]
+        public async void ShouldPauseUsersPlayback() {
+            await setupCreds();
+            RegularError res = await Endpoints.PauseUsersPlayback(Creds.Access_token);
+            Assert.False(res.WasError, $"Expected to puase users playback, but failed. See: {res.Message}");
         }
     }
 }
