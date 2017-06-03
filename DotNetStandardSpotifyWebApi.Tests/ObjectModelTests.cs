@@ -573,7 +573,7 @@ namespace DotNetStandardSpotifyWebApi.Tests {
                 Device active = devices.Where(x => x.Is_Active).First();
                 Device inactive = devices.Where(x => !x.Is_Active && !x.Is_Restricted).FirstOrDefault();
                 if(inactive != null) {
-                    RegularError res = await Endpoints.TransferUsersPlayback(Creds.Access_token, new List<string>() { inactive.Id });
+                    RegularError res = await Endpoints.TransferUsersPlayback(Creds.Access_token, new List<string>() { inactive.Id }, true);
                     Assert.False(res.WasError, "expected to transfer playback, but failed");
                 }
             }
