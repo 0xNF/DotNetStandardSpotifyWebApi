@@ -76,7 +76,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 Cursors = new Cursor(cobj);
             }
 
-            Func<JObject, ISpotifyObject> generator = Endpoints.CreateSpotifyObjectGenerator(typeof(T));
+            Func<JObject, ISpotifyObject> generator = WebRequestHelpers.CreateSpotifyObjectGenerator(typeof(T));
 
             JArray jarr = token.Value<JArray>("items");
             if (jarr != null) {
