@@ -1689,7 +1689,26 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             string options = EncodeRequestParams(paramDict);
             string req = endpoint + options;
             return await DoMethod(req, accessToken, "Paused playback", HttpMethod.Put);
+        }
 
+
+        /// <summary>
+        /// Skips to next track in the user’s queue.
+        /// After a successful skip operation, playback will automatically start.
+        /// The access token must have been issued on behalf of a premium user. 
+        /// The access token must have the user-modify-playback-state scope authorized in order to control playback.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> SkipPlaybackToUsersNextTrack(string accessToken, string device_id = "") {
+            string endpoint = "https://api.spotify.com/v1/me/player/next";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"device_id", device_id }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoMethod(req, accessToken, "Skipped to next song", HttpMethod.Post);
         }
     }
 }

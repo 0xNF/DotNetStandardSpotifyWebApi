@@ -520,5 +520,13 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             RegularError res = await Endpoints.PauseUsersPlayback(Creds.Access_token);
             Assert.False(res.WasError, $"Expected to puase users playback, but failed. See: {res.Message}");
         }
+
+        [Fact]
+        public async void ShouldSkipToNextTrack() {
+            await setupCreds();
+            RegularError res = await Endpoints.SkipPlaybackToUsersNextTrack(Creds.Access_token);
+            Assert.False(res.WasError, $"Expected to skop users playback, but failed. See: {res.Message}");
+
+        }
     }
 }
