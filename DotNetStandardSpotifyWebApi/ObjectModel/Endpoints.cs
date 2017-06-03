@@ -1591,6 +1591,54 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             return await DoHTTP<CurrentlyPlayingContext>(req, accessToken);
         }
 
+        //UNTESTED
+        /// <summary>
+        /// Transfer playback to a new device and determine if it should start playing.
+        /// 
+        ///  The access token must have the user-modify-playback-state scope authorized in order to control playback.
+        ///  
+        ///  Note that a value of false for the play parameter when also transferring to another device_id will not pause playback.
+        ///  To ensure that playback is paused on the new device you should send a pause command to the currently active device before transferring to the new device_id.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="device_ids">A list (Single-Element) containing the ID of the device on which playback should be started/transferred.
+        /// Note: Although an array is accepted, only a single device_id is currently supported. Supplying more than one will return 400 Bad Request</param>
+        /// <param name="play">Optional:  true: ensure playback happens on new device; false or not provided: keep the current playback state.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> TransferUsersPlayback(string accessToken, IEnumerable<string> device_ids, bool play = false) {
+            string endpoint = "https://api.spotify.com/v1/me/player";
+            Dictionary<string, object> messageBody = new Dictionary<string, object>() {
+                { "device_ids", JArray.FromObject(device_ids)},
+                {"play", play }
+            };
+            return await DoMethod(endpoint, accessToken, "Success", HttpMethod.Put, messageBody);
+        }
+
+        public static async Task<RegularError> StartOrResumePlayback(string accessToken, string device_id="", string context_uri = "", IEnumerable<string> uris = null, string offset = "") {
+            if(!string.IsNullOrEmpty(context_uri) && uris != null) {
+                throw new ArgumentException("uris and context_uri cannot both be defined. Please select one or the other.");
+            }
+            string endpoint = "https://api.spotify.com/v1/me/player/play";
+
+            Dictionary<string, object> messageBody = new Dictionary<string, object>() {
+            };
+            if (!string.IsNullOrEmpty(device_id)) {
+                messageBody.Add("device_id", device_id);
+            }
+            if(uris != null) {
+                messageBody.Add("uris", JArray.FromObject(uris));
+            }
+            if (!string.IsNullOrWhiteSpace(context_uri)) {
+                messageBody.Add("context_uri", context_uri);
+            }
+            //TODO offset is not properly implemenetd. It should be more like a ContextOffset type, with two subclasses (PositionOffset, UriOffset) or something.
+            if (!string.IsNullOrWhiteSpace(offset)) {
+                messageBody.Add("offset", offset);
+            }
+
+            return await DoMethod(endpoint, accessToken, $"Toggled playback on {device_id}.", HttpMethod.Put, messageBody);
+        }
+
 
 
     }

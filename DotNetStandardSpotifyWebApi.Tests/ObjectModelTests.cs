@@ -487,5 +487,27 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             Assert.False(current.WasError, "Object Error");
         }
 
+        [Fact]
+        public async void ShouldToggleUsersPlayback() {
+            //TODO Does not restart playback, and does not take a new song to play. Fix later.
+            await setupCreds();
+            //First get current playback devices
+            IReadOnlyList<Device> devices = await Endpoints.GetUsersAvailableDevices(Creds.Access_token);
+            Assert.True(devices.Any(), "Expected at least 1 playback device. Got none");
+
+            //Get currently playing song so we can restore it later.
+            CurrentlyPlayingContext current = await Endpoints.GetUsersCurrentlyPlayingInformation(Creds.Access_token);
+            //Stop playback
+            RegularError reg = await Endpoints.StartOrResumePlayback(Creds.Access_token, devices[0].Id);
+            Assert.False(reg.WasError, "Expected no error, got an error");
+            //Wait 4 seconds
+            await Task.Delay(4000);
+            //Restart playback
+            reg = await Endpoints.StartOrResumePlayback(Creds.Access_token);
+            Assert.False(reg.WasError, "Expected no error, got an error");
+
+
+        }
+
     }
 }
