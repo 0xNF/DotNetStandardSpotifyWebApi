@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 
-namespace DotNetStandardSpotifyWebApi.ObjectModel
-{
-    public static class Endpoints {
+namespace DotNetStandardSpotifyWebApi.ObjectModel {
+    public static partial class Endpoints {
 
         internal static Func<JToken, ISpotifyObject> CreateSpotifyObjectGenerator(Type t) {
             if (t == typeof(User)) {
@@ -236,7 +235,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         private static async Task<RegularError> DoMethod(string endpoint, string accessToken, string onSuccess, HttpMethod method, Dictionary<string, object> messageBody=null) {
             JObject putObject = JObject.FromObject(messageBody);
             HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, method);
-            if(messageBody != null) {
+            if(messageBody != null && messageBody.Any()) {
                 message.Headers.Accept.Clear();
                 message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 message.Content = new StringContent(putObject.ToString());
@@ -1614,6 +1613,18 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             return await DoMethod(endpoint, accessToken, "Success", HttpMethod.Put, messageBody);
         }
 
+
+        /// <summary>
+        /// Start a new context or resume current playback on the user’s active device.
+        ///  The access token must have been issued on behalf of a premium user. 
+        ///  The access token must have the user-modify-playback-state scope authorized in order to control playback.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
+        /// <param name="context_uri">Spotify URI of the context to play. Valid contexts are albums, artists & playlists. NOT TRACKS. Please use a singleton uris list instead.</param>
+        /// <param name="uris">Optional: List of the Spotify track URIs to play.</param>
+        /// <param name="offset">Optional. Indicates from where in the context playback should start. Only available when context_uri corresponds to an album or playlist object, or when the uris parameter is used.</param>
+        /// <returns></returns>
         public static async Task<RegularError> StartOrResumePlayback(string accessToken, string device_id="", string context_uri = "", IEnumerable<string> uris = null, string offset = "") {
             if(!string.IsNullOrEmpty(context_uri) && uris != null) {
                 throw new ArgumentException("uris and context_uri cannot both be defined. Please select one or the other.");

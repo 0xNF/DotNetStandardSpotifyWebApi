@@ -503,9 +503,8 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             //Wait 4 seconds
             await Task.Delay(4000);
             //Restart playback
-            reg = await Endpoints.StartOrResumePlayback(Creds.Access_token);
+            reg = await Endpoints.StartOrResumePlayback(Creds.Access_token, devices[0].Id, uris:new List<string>() {current.Item.Uri });
             Assert.False(reg.WasError, "Expected no error, got an error");
-
 
         }
 
