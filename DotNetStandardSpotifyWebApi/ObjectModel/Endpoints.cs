@@ -1710,5 +1710,26 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             string req = endpoint + options;
             return await DoMethod(req, accessToken, "Skipped to next song", HttpMethod.Post);
         }
+
+        /// <summary>
+        /// Skips to next previous in the user’s queue.
+        ///  Note that this will ALWAYS skip to the previous track, regardless of the current track’s progress. 
+        ///  Returning to the start of the current track should be performed using the https://api.spotify.com/v1/me/player/seek endpoint.
+        /// After a successful skip operation, playback will automatically start.
+        /// The access token must have been issued on behalf of a premium user. 
+        /// The access token must have the user-modify-playback-state scope authorized in order to control playback.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> SkipPlaybackToUsersPreviousTrack(string accessToken, string device_id = "") {
+            string endpoint = "https://api.spotify.com/v1/me/player/previous";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"device_id", device_id }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoMethod(req, accessToken, "Skipped to previous song", HttpMethod.Post);
+        }
     }
 }

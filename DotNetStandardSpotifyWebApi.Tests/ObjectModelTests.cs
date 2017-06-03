@@ -525,8 +525,15 @@ namespace DotNetStandardSpotifyWebApi.Tests {
         public async void ShouldSkipToNextTrack() {
             await setupCreds();
             RegularError res = await Endpoints.SkipPlaybackToUsersNextTrack(Creds.Access_token);
-            Assert.False(res.WasError, $"Expected to skop users playback, but failed. See: {res.Message}");
+            Assert.False(res.WasError, $"Expected to skip users playback forwards, but failed. See: {res.Message}");
 
+        }
+
+        [Fact]
+        public async void ShouldSkipToPreviousTrack() {
+            await setupCreds();
+            RegularError res = await Endpoints.SkipPlaybackToUsersPreviousTrack(Creds.Access_token);
+            Assert.False(res.WasError, $"Expected to skip users playback backwards, but failed. See: {res.Message}");
         }
     }
 }
