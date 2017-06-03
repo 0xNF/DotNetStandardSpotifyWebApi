@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
-    public static partial class Endpoints {
 
         public abstract class PlaybackOffset : SpotifyObjectModel, ISpotifyObject {
             //public abstract Dictionary<string,string> ToDictionary();
@@ -56,8 +55,4 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 return jobj.ToString();
             }
         }
-
-
-
-    }
 }

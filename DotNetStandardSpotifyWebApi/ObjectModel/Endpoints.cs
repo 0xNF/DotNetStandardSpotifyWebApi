@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 using System.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
-    public static partial class Endpoints {
+    public static class Endpoints {
 
         /// <summary>
         /// Get Spotify catalog information for a single album.
@@ -513,7 +513,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             string options = EncodeRequestParams(paramDict);
             string req = string.Format(endpoint) + options;
             return await DoHttpGetBools(accessToken, req);
-
         }
 
         /// <summary>
