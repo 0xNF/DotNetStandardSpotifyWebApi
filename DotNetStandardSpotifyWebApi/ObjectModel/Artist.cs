@@ -3,11 +3,6 @@ using Newtonsoft.Json.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class Artist : SpotifyObjectModel, ISpotifyObject {
-        private const string api_GetArtist = baseUrl + "/v1/artists/{0}";
-        private const string api_GetArtists = baseUrl + "/v1/artists?ids={0}";
-        private const string api_GetArtistsAlbums = baseUrl + "/v1/artists/{0}/albums";
-        private const string api_GetArtistsTopTracks = baseUrl + "/v1/artists/{0}/top-tracks";
-        private const string api_GetRelatedArtists = baseUrl + "/v1/artists/{0}/related-artists";
 
         /// <summary>
         /// Known external URLs for this artist.

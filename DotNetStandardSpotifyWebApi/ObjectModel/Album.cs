@@ -4,9 +4,6 @@ using System.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class Album : SpotifyObjectModel, ISpotifyObject {
-        private const string api_GetAlbum = baseUrl + "/v1/albums/{0}";
-        private const string api_GetAlbums = baseUrl + "/v1/albums?ids={0}";
-        private const string api_GetAlbumsTracks = baseUrl + "/v1/albums/{0}/tracks";
 
         /// <summary>
         /// The type of the album: one of "album", "single", or "compilation". 

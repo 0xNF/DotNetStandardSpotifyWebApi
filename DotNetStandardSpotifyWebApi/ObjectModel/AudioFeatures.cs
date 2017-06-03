@@ -2,9 +2,6 @@
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class AudioFeatures : SpotifyObjectModel, ISpotifyObject {
-        private const string api_GetAudioFeature = baseUrl + "/v1/audio-features/{0}";
-        private const string api_GetAudioFeatures = baseUrl + "/v1/audio-features?ids={0}";
-
 
 
         /// <summary>

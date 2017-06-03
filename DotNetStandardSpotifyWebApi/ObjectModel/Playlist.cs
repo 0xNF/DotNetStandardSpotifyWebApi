@@ -8,56 +8,12 @@ using System;
 using System.Diagnostics;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
-
-    public class FeaturedPlaylists : SpotifyObjectModel, ISpotifyObject{
-        public string Message { get; } = string.Empty;
-        public Paging<Playlist> Playlists { get; } = new Paging<Playlist>(true, "Not initialized yet");
-
-        /// <summary>
-        /// Empty Constructor
-        /// </summary>
-        public FeaturedPlaylists() {
-
-        }
-
-        /// <summary>
-        /// Error Constructor
-        /// </summary>
-        /// <param name="wasError"></param>
-        /// <param name="errorMessage"></param>
-        public FeaturedPlaylists(bool wasError, string errorMessage) {
-            WasError = WasError;
-            ErrorMessage = errorMessage;
-        }
-
-        /// <summary>
-        /// JToken constructor
-        /// </summary>
-        /// <param name="token"></param>
-        public FeaturedPlaylists(JToken token) {
-            Message = token.Value<string>("message") ?? string.Empty;
-            JToken pls = token.Value<JToken>("playlists");
-            if(pls != null) {
-                Playlists = new Paging<Playlist>(pls);
-            }
-        }
-    }
     /// <summary>
     /// Object representing both the Full and Simplified Playlist Objects
     /// https://developer.spotify.com/web-api/object-model/#playlist-object-full
     /// https://developer.spotify.com/web-api/object-model/#playlist-object-simplified
     /// </summary>
     public class Playlist : SpotifyObjectModel, ISpotifyObject {
-
-        /// <summary>
-        /// URL locations of the APIs available for getting Playlist objects
-        /// </summary>
-        private const string api_GetPlaylist = baseUrl + "/v1/users/{0}/playlists/{1}";
-        private const string api_GetPlaylistsTracks = baseUrl + "/v1/users/{0}/playlists/{1}/tracks?limit={2}&offset={3}";
-        private const string api_CreatePlaylist = baseUrl + "/v1/users/{0}/playlists";
-        private const string api_GetPublicPlaylists = baseUrl + "/v1/users/{0}/playlists?limit={1}&offset={2}";
-        private const string api_CheckUserFollowsPlaylist = baseUrl + "/v1/users/{0}/playlists/{1}/followers/contains";
-        private const string api_FollowPlaylist = baseUrl + "/v1/users/{0}/playlists/{1}/followers";
 
         /// <summary>
         /// true if the owner allows other users to modify the playlist. 
@@ -211,105 +167,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// </summary>
         public Playlist() {
 
-        }
-
-        /// <summary>
-        /// Gets a playlist associated with the given userId and playlistId
-        /// </summary>
-        /// <param name="user_id">Spotify Id of playlist owner</param>
-        /// <param name="playlist_id">Playlist id</param>
-        /// <param name="accessToken">OAuth access token</param>
-        /// <returns></returns>
-        public static async Task<Playlist> GetPlaylist(string user_id, string playlist_id, string accessToken) {
-            string req = string.Format(api_GetPlaylist, user_id, playlist_id);
-            HttpRequestMessage message = WebRequestHelpers.SetupRequest(req, accessToken);
-            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
-            if (response.IsSuccessStatusCode) {
-                JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
-                return new Playlist(token);
-            }
-            else {
-                return new Playlist(true, response.ReasonPhrase);
-            }
-        }
-
-        /// <summary>
-        /// Returns a Paging object of Playlists. Paging object conatains the first 50 playlists. 
-        /// The remaining playlists are available by using the paging's GetNext() method
-        /// </summary>
-        /// <param name="user_id">Spotify Id of playlist owner</param>
-        /// <param name="accessToken">OAuth access token</param>
-        /// <returns></returns>
-        public static async Task<Paging<Playlist>> GetPublicPlaylists(string user_id, string accessToken) {
-            int limit = 50;
-            int offset = 0;
-            string req = string.Format(api_GetPublicPlaylists, user_id, limit, offset);
-            HttpRequestMessage message = WebRequestHelpers.SetupRequest(req, accessToken);
-            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
-            if (response.IsSuccessStatusCode) {
-                JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
-                Paging<Playlist> paging = new Paging<Playlist>(token);
-                return paging;
-            }
-            else {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Returns a paging object of tracks from a specified playlist
-        /// </summary>
-        /// <param name="user_id">Spotify Id of Playlist owner</param>
-        /// <param name="playlist_id">Playist Id</param>
-        /// <param name="accessToken">OAuth access token</param>
-        /// <returns></returns>
-        public static async Task<Paging<PlaylistTrack>> GetTracks(string user_id, string playlist_id, string accessToken) {
-            int limit = 100;
-            int offset = 0;
-            string req = string.Format(api_GetPlaylistsTracks, user_id, playlist_id, limit, offset);
-            HttpRequestMessage message = WebRequestHelpers.SetupRequest(req, accessToken);
-            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
-            if (response.IsSuccessStatusCode) {
-                JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
-                Paging<PlaylistTrack> page = new Paging<PlaylistTrack>(token);
-                return page;
-            }
-            else {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Adds the given TrackURIS to the specified playlist
-        /// Returns a snapshot id of the newly modified playlist
-        /// </summary>
-        /// <param name="userId">Spotify ID of playlist owner</param>
-        /// <param name="playlistId">Playlist ID</param>
-        /// <param name="trackUris">Spotify URIs for the desired tracks</param>
-        /// <param name="position">Optional. The position to insert the tracks, a zero-based index. For example, to insert the tracks in the first position: position=0; to insert the tracks in the third position: position=2. If omitted, the tracks will be appended to the playlist. Tracks are added in the order they are listed in the query string or request body.</param>
-        /// <param name="accessToken">OAuth access token</param>
-        /// <returns>snapshot id of modified playlist</returns>
-        public static async Task<string> AddTracks(string user_id, string playlist_id, IEnumerable<string> trackUris, int postition, string accessToken) {
-            string req = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
-            HttpRequestMessage message = WebRequestHelpers.SetupRequest(req, accessToken, HttpMethod.Post);
-            message.Headers.Accept.Clear();
-            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                {"uris", trackUris},
-                {"position", postition}
-            };
-            string postObject = JObject.FromObject(keys).ToString();
-            message.Content = new StringContent(postObject);
-            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
-            if (response.IsSuccessStatusCode) {
-                string content = await response.Content.ReadAsStringAsync();
-                JObject jobj = JObject.Parse(content);
-                return jobj.Value<string>("snapshot_id");
-            }
-            else {
-                //Error value
-                return "";
-            }
         }
 
     }

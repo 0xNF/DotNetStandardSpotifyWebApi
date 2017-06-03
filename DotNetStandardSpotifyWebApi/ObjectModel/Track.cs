@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class Track : SpotifyObjectModel, ISpotifyObject {
-        private const string api_GetTrack = baseUrl + "/v1/tracks/{0}";
-        private const string api_GetTracks = baseUrl + "/v1/tracks?ids={0}";
 
         /// <summary>
         /// The album on which the track appears. 
