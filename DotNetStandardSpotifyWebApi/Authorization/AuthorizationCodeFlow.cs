@@ -51,6 +51,22 @@ namespace DotNetStandardSpotifyWebApi.Authorization {
         }
 
         /// <summary>
+        /// Creates an AuthorizationInProgress containing the generated state value, as well as the redirect request.
+        /// The returned values may be used to add and delete cookies to check state.
+        /// </summary>
+        /// <param name="clientId">The client ID of your Spotify App</param>
+        /// <param name="appRedirectUri">The redirect url of your Spotify App</param>
+        /// <param name="scopes">List of scopes your app requires access to</param>
+        /// <returns></returns>
+        public static AuthorizationInProgress GetAuthStateAndRedirect(string clientId, string appRedirectUri, List<SpotifyScopeEnum> scopes) {
+            string SpotifyAuthRequestUrl = "https://accounts.spotify.com/authorize";
+            string stateValue = GetAuthState();
+            string scopeString = string.Join(",",scopes.Select(x => x.Name));
+            string redirect = $"{SpotifyAuthRequestUrl}?response_type=code&client_id={clientId}&scope={scopeString}&redirect_uri={appRedirectUri}&state={stateValue}";
+            return new AuthorizationInProgress(stateValue, redirect);
+        }
+
+        /// <summary>
         /// Returns a SpotifyOAuthCredentials. On success, returns with an access token, a refresh token, and a timer limit for the validity of the access token. (Refresh has no expiry). Sets WasSuccessful to True
         /// On error, returns with the error code and message, and the other fields are null. Also sets WasSuccess to false.
         /// </summary>

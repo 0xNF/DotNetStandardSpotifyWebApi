@@ -80,9 +80,6 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
             else if (t == typeof(PlayHistory)) {
                 return (tk) => { return new PlayHistory(tk); };
             }
-            else if (t == typeof(Playback)) {
-                return (tk) => { return new Playback(tk); };
-            }
             else if (t == typeof(Device)) {
                 return (tk) => { return new Device(tk); };
             }
@@ -119,9 +116,6 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
             else if (t == typeof(Paging<PlayHistory>)) {
                 return (tk) => { return new Paging<PlayHistory>(tk); };
             }
-            else if (t == typeof(Paging<Playback>)) {
-                return (tk) => { return new Paging<Playback>(tk); };
-            }
             else if (t == typeof(Paging<Device>)) {
                 return (tk) => { return new Paging<Device>(tk); };
             }
@@ -151,9 +145,6 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
             }
             else if (t == typeof(CursorBasedPaging<PlayHistory>)) {
                 return (tk) => { return new CursorBasedPaging<PlayHistory>(tk); };
-            }
-            else if (t == typeof(CursorBasedPaging<Playback>)) {
-                return (tk) => { return new CursorBasedPaging<Playback>(tk); };
             }
             else if (t == typeof(CursorBasedPaging<Device>)) {
                 return (tk) => { return new CursorBasedPaging<Device>(tk); };
