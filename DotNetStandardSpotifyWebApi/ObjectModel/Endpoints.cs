@@ -1625,7 +1625,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="uris">Optional: List of the Spotify track URIs to play.</param>
         /// <param name="offset">Optional. Indicates from where in the context playback should start. Only available when context_uri corresponds to an album or playlist object, or when the uris parameter is used.</param>
         /// <returns></returns>
-        public static async Task<RegularError> StartOrResumePlayback(string accessToken, string device_id="", string context_uri = "", IEnumerable<string> uris = null, string offset = "") {
+        public static async Task<RegularError> StartOrResumePlayback(string accessToken, string device_id="", string context_uri = "", IEnumerable<string> uris = null, object offset= null) {
             if(!string.IsNullOrEmpty(context_uri) && uris != null) {
                 throw new ArgumentException("uris and context_uri cannot both be defined. Please select one or the other.");
             }
@@ -1642,15 +1642,35 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if (!string.IsNullOrWhiteSpace(context_uri)) {
                 messageBody.Add("context_uri", context_uri);
             }
-            //TODO offset is not properly implemenetd. It should be more like a ContextOffset type, with two subclasses (PositionOffset, UriOffset) or something.
-            if (!string.IsNullOrWhiteSpace(offset)) {
-                messageBody.Add("offset", offset);
-            }
+            if(offset != null) {
+                switch (offset) {
+                    case string s:
+                        if (!string.IsNullOrWhiteSpace(s)) {
+                            messageBody.Add("offset", JObject.FromObject(new Dictionary<string, string>() { { "uri", s } }));
+                        }
+                        else {
+                            throw new ArgumentException("Offset was empty. Either do not supply an offset, or set a valid string");
+                        }
+                        break;
+                    case int i:
+                        if(i > -1) {
+                            messageBody.Add("position", i);
+                        }
+                        else {
+                            throw new ArgumentException("Offset was negative. Either do not supply an offset, or set a non-negative integer");
+                        }
+                        break;
+                    default:
+                        throw new ArgumentException("Offset was neither an int nor a string. Please ensure that offset is one of those two types.");
+                }
+                if(offset.GetType() == typeof(string)) {
+                    messageBody.Add("offset", JObject.FromObject(new Dictionary<string, string>() { { "uri", offset as string} }));
+                }
+                else if (offset.GetType() == typeof(int)) {
 
+                }
+            }
             return await DoMethod(endpoint, accessToken, $"Toggled playback on {device_id}.", HttpMethod.Put, messageBody);
         }
-
-
-
     }
 }

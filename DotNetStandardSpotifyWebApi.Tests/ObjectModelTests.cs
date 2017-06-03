@@ -41,6 +41,13 @@ namespace DotNetStandardSpotifyWebApi.Tests {
         //A track the current user does not have in their library
         private const string Track_NoSaved = "6H3kDe7CGoWYBabAeVWGiD"; //Gimme Shelter - The Rolling Stones
 
+        //Track URIs for endpoints that require multiple track uris
+        private static List<string> TrackUris = new List<string>() {
+                "spotify:track:7rXhnFjG74YKMgq0R89Bpz",//Papi
+                "spotify:track:1TG5DvegcKAJOuKmKCKOIU",//Over You
+                "spotify:track:3GK0gr4QMLeXSm50eCBWp8", //Dance - Oliver Remix
+            };
+
         private const string CategoryCheck = "party";
 
         //Credentials object to use in testing
@@ -402,13 +409,8 @@ namespace DotNetStandardSpotifyWebApi.Tests {
         [Fact]
         public async void ShouldRemoveSongsFromPlaylist() {
             await setupCreds();
-            List<string> uris = new List<string>() {
-                "spotify:track:7rXhnFjG74YKMgq0R89Bpz",//Papi
-                "spotify:track:1TG5DvegcKAJOuKmKCKOIU",//Over You
-                "spotify:track:3GK0gr4QMLeXSm50eCBWp8", //Dance - Oliver Remix
-            };
             string pid = "6cFJgP266Kp31iY8ewuZrv"; // TEST playlist
-            RegularError res = await Endpoints.RemoveTracksFromPlaylist(Creds.Access_token, CurrentUserId, pid, uris);
+            RegularError res = await Endpoints.RemoveTracksFromPlaylist(Creds.Access_token, CurrentUserId, pid, TrackUris);
             Assert.False(res.WasError, "Failed to delete from playlist");
         }
 
@@ -418,21 +420,16 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             //First create a new playlist
             Playlist p = await Endpoints.CreateAPlaylist(Creds.Access_token, CurrentUserId, "Test Reordering");
             //Then Add songs in a certain order
-            List<string> uris = new List<string>() {
-                "spotify:track:7rXhnFjG74YKMgq0R89Bpz",//Papi
-                "spotify:track:1TG5DvegcKAJOuKmKCKOIU",//Over You
-                "spotify:track:3GK0gr4QMLeXSm50eCBWp8", //Dance - Oliver Remix
-            };
-            RegularError AddTrackError = await Endpoints.AddTracksToPlaylist(Creds.Access_token, CurrentUserId, p.Id, uris);
+            RegularError AddTrackError = await Endpoints.AddTracksToPlaylist(Creds.Access_token, CurrentUserId, p.Id, TrackUris);
             Assert.False(AddTrackError.WasError, "Failed to add tracks to playlist");
             //Then reorder
             RegularError  ReorderError = await Endpoints.ReorderPlaylistsTracks(Creds.Access_token, CurrentUserId, p.Id, 0, 3); //Should move Papi to end
             Assert.False(ReorderError.WasError, "Failed to issue reorder command");
             //Then check the reorder
             Paging<PlaylistTrack> page = await Endpoints.GetAPlaylistsTracks(Creds.Access_token, CurrentUserId, p.Id);
-            Assert.True(page.Items[0].Track.Uri.Equals(uris[1]), "Expected the uris to be different.");
-            Assert.True(page.Items[1].Track.Uri.Equals(uris[2]), "Expected the uris to be different.");
-            Assert.True(page.Items[2].Track.Uri.Equals(uris[0]), "Expected the uris to be different.");
+            Assert.True(page.Items[0].Track.Uri.Equals(TrackUris[1]), "Expected the uris to be different.");
+            Assert.True(page.Items[1].Track.Uri.Equals(TrackUris[2]), "Expected the uris to be different.");
+            Assert.True(page.Items[2].Track.Uri.Equals(TrackUris[0]), "Expected the uris to be different.");
             //Then unfollow the playlist
             await Endpoints.UnfollowAPlaylist(Creds.Access_token, CurrentUserId, p.Id);
         }
@@ -443,25 +440,20 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             //First create a new playlist
             Playlist p = await Endpoints.CreateAPlaylist(Creds.Access_token, CurrentUserId, "Test Replacement");
             //Then Add songs in a certain order
-            List<string> uris = new List<string>() {
-                "spotify:track:7rXhnFjG74YKMgq0R89Bpz",//Papi
-                "spotify:track:1TG5DvegcKAJOuKmKCKOIU",//Over You
-                "spotify:track:3GK0gr4QMLeXSm50eCBWp8", //Dance - Oliver Remix
-            };
-            RegularError AddTrackError = await Endpoints.AddTracksToPlaylist(Creds.Access_token, CurrentUserId, p.Id, uris);
+            RegularError AddTrackError = await Endpoints.AddTracksToPlaylist(Creds.Access_token, CurrentUserId, p.Id, TrackUris);
             Assert.False(AddTrackError.WasError, "Failed to add tracks to playlist");
             //Then remove every song
             RegularError ReorderError = await Endpoints.ReplacePlaylistTracks(Creds.Access_token, CurrentUserId, p.Id, new List<string>() { "spotify:track:1TG5DvegcKAJOuKmKCKOIU"}); //Should have only Over You in it
             Assert.False(ReorderError.WasError, "Failed to issue reorder command at first");
             //Then check the reorder
             Paging<PlaylistTrack> page = await Endpoints.GetAPlaylistsTracks(Creds.Access_token, CurrentUserId, p.Id);
-            Assert.True(page.Total == 1, $"Expected there to be 1 item, but playlist still has {uris.Count}.");
+            Assert.True(page.Total == 1, $"Expected there to be 1 item, but playlist still has {TrackUris.Count}.");
             //Test for clearing the list
             ReorderError = await Endpoints.ReplacePlaylistTracks(Creds.Access_token, CurrentUserId, p.Id, new List<string>()); //Should now be empty
             Assert.False(ReorderError.WasError, "Failed to issue replace command at second");
             //Then check the reorder
             page = await Endpoints.GetAPlaylistsTracks(Creds.Access_token, CurrentUserId, p.Id);
-            Assert.True(page.Total == 0, $"Expected there to be no items, but playlist still has {uris.Count}.");
+            Assert.True(page.Total == 0, $"Expected there to be no items, but playlist still has {TrackUris.Count}.");
             //Then unfollow the playlist
             await Endpoints.UnfollowAPlaylist(Creds.Access_token, CurrentUserId, p.Id);
         }
@@ -508,5 +500,21 @@ namespace DotNetStandardSpotifyWebApi.Tests {
 
         }
 
+        [Fact]
+        public async void ShouldStartPlaybackAtSecondOffset() {
+            //TODO Does not restart playback, and does not take a new song to play. Fix later.
+            await setupCreds();
+            //First get current playback devices
+            IReadOnlyList<Device> devices = await Endpoints.GetUsersAvailableDevices(Creds.Access_token);
+            Assert.True(devices.Any(), "Expected at least 1 playback device. Got none");
+
+            //Get currently playing song so we can restore it later.
+            CurrentlyPlayingContext current = await Endpoints.GetUsersCurrentlyPlayingInformation(Creds.Access_token);
+
+            //Start playback
+            RegularError reg = await Endpoints.StartOrResumePlayback(Creds.Access_token, devices[0].Id, uris:TrackUris, offset:1 );
+            Assert.False(reg.WasError, "Expected no error, got an error");
+
+        }
     }
 }
