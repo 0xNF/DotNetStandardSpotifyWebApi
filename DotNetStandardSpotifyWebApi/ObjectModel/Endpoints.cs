@@ -570,7 +570,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             return await DoMethod(req, accessToken, $"successfully followed some {type}", HttpMethod.Put, putItems);
         }
 
-
         /// <summary>
         /// Remove the current user as a follower of one or more artists.
         /// Modifying the list of artists the current user follows requires authorization of the user-follow-modify scope. See Using Scopes.
@@ -671,19 +670,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             Dictionary<string, object> putItems = new Dictionary<string, object>() {
                 {"public", isPublic }
             };
-            JObject putObject = JObject.FromObject(putItems);
-
-            HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken, HttpMethod.Put);
-            message.Headers.Accept.Clear();
-            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            message.Content = new StringContent(putObject.ToString());
-            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
-            if (response.IsSuccessStatusCode) {
-                return new RegularError(false, $"successfully followed playlist {playlist_id}");
-            }
-            else {
-                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
-            }
+            return await DoMethod(endpoint, accessToken, $"successfully follows play list {playlist_id}", HttpMethod.Put, putItems);
         }
 
         /// <summary>
@@ -705,6 +692,26 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             else {
                 return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
             }
+        }
+
+        /// <summary>
+        /// Check to see if one or more Spotify users are following a specified playlist.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="owner_id">The Spotify user ID of the person who owns the playlist.</param>
+        /// <param name="playlist_id">The Spotify ID of the playlist.</param>
+        /// <param name="user_ids">A list of Spotify User ids that you want to check to see if they follow the playlist. Maximum 5 ids</param>
+        /// <returns></returns>
+        public static async Task<IReadOnlyList<bool>> CheckUsersFollowsPlaylist(string accessToken, string owner_id, string playlist_id, IEnumerable<string> user_ids) {
+            int maxParams = 5;
+            string endpoint = $"https://api.spotify.com/v1/users/{owner_id}/playlists/{playlist_id}/followers/contains";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"ids", string.Join(",", user_ids.Take(maxParams)) }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = string.Format(endpoint) + options;
+            return await DoHttpGetBools(accessToken, req);
+
         }
 
         /// <summary>

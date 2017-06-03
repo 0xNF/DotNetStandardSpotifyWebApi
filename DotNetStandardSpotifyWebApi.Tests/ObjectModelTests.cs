@@ -211,9 +211,16 @@ namespace DotNetStandardSpotifyWebApi.Tests {
 
         }
 
+        [Fact]
         public async void ShouldFollowAPlaylist() {
             await setupCreds();
-
+            //https://open.spotify.com/user/rollingstonesmusic/playlist/06m5HzAGIkYyLsDdNpWoCp
+            RegularError res = await Endpoints.FollowAPlaylist(Creds.Access_token, "rollingstonesmusic", Playlist_NoFollow);
+            Assert.False(res.WasError, "Object Error");
+            IReadOnlyList<bool> bools = await Endpoints.CheckUsersFollowsPlaylist(Creds.Access_token, "rollingstonesmusic", Playlist_NoFollow, new string[] { CurrentUserId });
+            Assert.True(bools[0], $"Expected to follow playlist {Playlist_NoFollow}, but don't");
+            //Restoring to default state
+            await Endpoints.UnfollowAPlaylist(Creds.Access_token, "rollingstonesmusic", Playlist_NoFollow);
         }
 
         public async void ShouldUnfollowAPlaylist() {
