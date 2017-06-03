@@ -523,15 +523,16 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         }
 
         /// <summary>
-        /// Add the current user as a follower of one or more artists or other Spotify users.
-        /// Modifying the list of artists or users the current user follows requires authorization of the user-follow-modify scope. See Using Scopes.
+        /// Add the current user as a follower of one or more artists.
+        /// Modifying the list of artists the current user follows requires authorization of the user-follow-modify scope. See Using Scopes.
         /// </summary>
         /// <param name="accessToken">OAuth access token</param>
-        /// <param name="type">Required. The ID type: either "artist" or "user".</param>
-        /// <param name="ids">A list of the artist or the user Spotify IDs. A maximum of 50 IDs can be sent in one request.</param>
+        /// <param name="ids">A list of the artist Spotify IDs. A maximum of 50 IDs can be sent in one request.</param>
         /// <returns></returns>
-        public static async Task<RegularError> FollowArtistOrUsers(string accessToken, string type, IEnumerable<string> ids) {
+        public static async Task<RegularError> FollowArtists(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/following";
+            string type = "artist";
+            int maxParams = 50;
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"type", type}
             };
@@ -539,21 +540,34 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             string req = string.Format(endpoint) + options;
 
             Dictionary<string, object> putItems = new Dictionary<string, object>() {
-                {"ids", ids }
+                {"ids", ids.Take(maxParams) }
             };
-            JObject putObject = JObject.FromObject(putItems);
 
-            HttpRequestMessage message = WebRequestHelpers.SetupRequest(req, accessToken, HttpMethod.Put);
-            message.Headers.Accept.Clear();
-            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            message.Content = new StringContent(putObject.ToString());
-            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
-            if (response.IsSuccessStatusCode) {
-                return new RegularError(false, $"successfully followed some {type}");
-            }
-            else {
-                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
-            }
+            return await DoMethod(req, accessToken, $"successfully followed some {type}", HttpMethod.Put, putItems);
+        }
+
+        /// <summary>
+        /// Add the current user as a follower of one or more other Spotify users.
+        /// Modifying the list of Spotify users the current user follows requires authorization of the user-follow-modify scope. See Using Scopes.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="ids">A list of the user Spotify IDs. A maximum of 50 IDs can be sent in one request.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> FollowUsers(string accessToken, IEnumerable<string> ids) {
+            string endpoint = "https://api.spotify.com/v1/me/following";
+            string type = "user";
+            int maxParams = 50;
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"type", type}
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = string.Format(endpoint) + options;
+
+            Dictionary<string, object> putItems = new Dictionary<string, object>() {
+                {"ids", ids.Take(maxParams) }
+            };
+
+            return await DoMethod(req, accessToken, $"successfully followed some {type}", HttpMethod.Put, putItems);
         }
 
 
@@ -579,7 +593,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             string onSuccess = $"successully unfollowed some {type}";
             return await DoMethod(req, accessToken, onSuccess, HttpMethod.Delete, putItems);
         }
-
 
         /// <summary>
         /// Remove the current user as a follower of one or more Spotify users.
@@ -623,7 +636,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
             string req = string.Format(endpoint) + options;
             return await DoHttpGetBools(accessToken, req);
         }
-
 
         /// <summary>
         /// Check to see if the current user is following one or more other Spotify users.
