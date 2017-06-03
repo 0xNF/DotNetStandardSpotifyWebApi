@@ -261,6 +261,23 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
             return req;
         }
 
+        internal static async Task<RegularError> DoMethod(string endpoint, string accessToken, string onSuccess, HttpMethod method, Dictionary<string, object> messageBody = null) {
+            HttpRequestMessage message = SetupRequest(endpoint, accessToken, method);
+            if (messageBody != null && messageBody.Any()) {
+                JObject putObject = JObject.FromObject(messageBody);
+                message.Headers.Accept.Clear();
+                message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                message.Content = new StringContent(putObject.ToString());
+            }
+            HttpResponseMessage response = await Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                return new RegularError(false, onSuccess);
+            }
+            else {
+                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
+            }
+        }
+
 
 
     }
