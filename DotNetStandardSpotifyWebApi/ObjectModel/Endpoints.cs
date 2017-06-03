@@ -1731,5 +1731,26 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             string req = endpoint + options;
             return await DoMethod(req, accessToken, "Skipped to previous song", HttpMethod.Post);
         }
+
+        /// <summary>
+        /// Seeks to the given position in the user’s currently playing track.
+        /// After a successful skip operation, playback will automatically start.
+        /// The access token must have been issued on behalf of a premium user. 
+        /// The access token must have the user-modify-playback-state scope authorized in order to control playback.
+        /// </summary>
+        /// <param name="accessToken">OAuth access token</param>
+        /// <param name="position_ms">Required. The position in milliseconds to seek to. Must be a positive number. Passing in a position that is greater than the length of the track will cause the player to start playing the next song.</param>
+        /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
+        /// <returns></returns>
+        public static async Task<RegularError> SeekToPositionInCurrentlyPlayingTrack(string accessToken, long position_ms, string device_id = "") {
+            string endpoint = "https://api.spotify.com/v1/me/player/seek";
+            Dictionary<string, object> paramDict = new Dictionary<string, object>() {
+                {"position_ms", position_ms },
+                {"device_id", device_id }
+            };
+            string options = EncodeRequestParams(paramDict);
+            string req = endpoint + options;
+            return await DoMethod(req, accessToken, $"Seeked to {position_ms}", HttpMethod.Put);
+        }
     }
 }
