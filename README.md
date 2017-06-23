@@ -6,7 +6,7 @@ Compatible with .NET Core, ASP.NET Core, and UWP.
 
 #### 89% Complete  
 Todo:   
-* implement the remaining endpoints  
+* Implement the remaining 7 endpoints  
 * Make Authorization easier  
 * Add useful helper methods  
   
