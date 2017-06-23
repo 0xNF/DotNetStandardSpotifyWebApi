@@ -49,6 +49,7 @@ namespace DotNetStandardSpotifyWebApi.Tests {
                 "spotify:track:3GK0gr4QMLeXSm50eCBWp8", //Dance - Oliver Remix
             };
 
+        //A sample Category to get
         private const string CategoryCheck = "party";
 
         //Credentials object to use in testing
