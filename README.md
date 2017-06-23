@@ -4,12 +4,11 @@
 
 Compatible with .NET Core, ASP.NET Core, and UWP.  
 
-### Completion
 #### 89% Complete  
 Todo:   
-    *implement the remaining endpoints  
-    *Make Authorization easier  
-    *Add useful helper methods  
+* implement the remaining endpoints  
+* Make Authorization easier  
+* Add useful helper methods  
   
 
 #### Available Endpoints
