@@ -142,22 +142,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
     }
 
-    public class AudioAnalysis : SpotifyObjectModel, ISpotifyObject {
-
-        public AudioAnalysis() {
-
-        }
-
-        public AudioAnalysis(bool wasError, string errorMessage) {
-            WasError = wasError;
-            ErrorMessage = errorMessage;
-        }
-
-        public AudioAnalysis(JToken token) {
-
-        }
-    }
-
 
     public class Recommendation : SpotifyObjectModel, ISpotifyObject {
 

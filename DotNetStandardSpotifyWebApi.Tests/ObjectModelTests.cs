@@ -580,5 +580,12 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             }
         }
 
+        [Fact]
+        public async void ShouldGetAnAudioAnalysis() {
+            await SetupCredentials();
+            AudioAnalysis aa = await Endpoints.GetAudioAnalysis(Creds.Access_token, Track_Saved);
+            Assert.True(aa != null);
+        }
+
     }
 }

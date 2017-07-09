@@ -6,7 +6,7 @@ Compatible with .NET Core, ASP.NET Core, and UWP.
 
 #### 89% Complete  
 Todo:   
-* Implement the remaining 7 endpoints  
+* Implement the remaining 6 endpoints  
 * Make Authorization easier  
 * Add useful helper methods  
   
@@ -23,6 +23,7 @@ Currently Implements the following endpoints:
 * [Get an artist's related artists](https://developer.spotify.com/web-api/get-related-artists/)
 * [Get audio features for a track](https://developer.spotify.com/get-audio-features/)
 * [Get audio features for several tracks](https://developer.spotify.com/get-several-audio-features/)
+* [Get Audio Analysis for a Track](https://developer.spotify.com/web-api/get-audio-analysis/)
 * [Get a list of featured playlists ](https://developer.spotify.com/web-api/get-list-featured-playlists/)
 * [Get a list of new releases](https://developer.spotify.com/web-api/get-list-new-releases/)
 * [Get a list of categories](https://developer.spotify.com/web-api/get-list-categories/)
@@ -78,7 +79,7 @@ The following endpoints are not yet implemeted:
 * [Search for a playlist](https://developer.spotify.com/web-api/search-item/)
 * [Search for a track](https://developer.spotify.com/web-api/search-item/)
 * [Remove tracks from a playlist](https://developer.spotify.com/web-api/remove-tracks-playlist/)
-* [Get Audio Analysis for a Track](https://developer.spotify.com/web-api/get-audio-analysis/)
+
 
 
 
