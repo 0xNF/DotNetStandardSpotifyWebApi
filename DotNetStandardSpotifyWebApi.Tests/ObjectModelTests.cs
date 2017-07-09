@@ -587,5 +587,11 @@ namespace DotNetStandardSpotifyWebApi.Tests {
             Assert.True(aa != null);
         }
 
+        [Fact]
+        public async void ShouldGetAvailableSeedGenres() {
+            await SetupCredentials();
+            IEnumerable<string> genres = await Endpoints.GetAvailableGenreSeeds(Creds.Access_token);
+        }
+
     }
 }

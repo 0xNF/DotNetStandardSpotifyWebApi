@@ -141,12 +141,4 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         }
 
     }
-
-
-    public class Recommendation : SpotifyObjectModel, ISpotifyObject {
-
-    }
-
-
-
 }
