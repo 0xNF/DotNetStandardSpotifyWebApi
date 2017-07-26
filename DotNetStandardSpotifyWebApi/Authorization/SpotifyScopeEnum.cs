@@ -63,6 +63,7 @@ namespace DotNetStandardSpotifyWebApi.Authorization {
         public readonly static SpotifyScopeEnum USER_READ_PLAYBACK_STATE = new SpotifyScopeEnum("user-read-playback-state", "n/a", "n/a");
         public readonly static SpotifyScopeEnum USER_MODIFY_PLAYBACK_STATE = new SpotifyScopeEnum("user-modify-playback-state", "n/a", "n/a");
         public readonly static SpotifyScopeEnum USER_READ_RECENTLY_PLAYED = new SpotifyScopeEnum("user-read-recently-played", "n/a", "n/a");
+        public readonly static SpotifyScopeEnum UGC_IMAGE_UPLOAD = new SpotifyScopeEnum("ugc-image-uploa", "Upload playlist cover image.", "Upload images to Spotify on your behalf");
         #endregion
 
     }

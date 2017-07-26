@@ -1119,6 +1119,36 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         }
 
         /// <summary>
+        /// Upload a Custom Playlist Cover Image
+        /// Replace the image used to represent a specific playlist.
+        /// 
+        /// Takes a Base64 encoded JPEG image data, maximum payload size is 256 KB
+        /// 
+        /// This access token must be tied to the user who owns the playlist, and must have the scope ugc-image-upload granted.
+        /// In addition, the token must also contain playlist-modify-public and/or playlist-modify-private,
+        /// depending the public status of the playlist you want to update .
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="user_id"></param>
+        /// <param name="playlist_id"></param>
+        /// <param name="b64_imageData">Base64 encoded JPEG image data, maximum payload size is 256 KB</param>
+        /// <returns></returns>
+        public static async Task<RegularError> UploadCustomPlaylistCoverimage(string accessToken, string user_id, string playlist_id, string b64_imageData) {
+            string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/images";
+            HttpRequestMessage message = SetupRequest(endpoint, accessToken, HttpMethod.Put);
+            message.Headers.Accept.Clear();
+            message.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("image/jpeg"));
+            message.Content = new StringContent(b64_imageData);
+            HttpResponseMessage response = await Client.SendAsync(message);
+            if (response.IsSuccessStatusCode) {
+                return new RegularError(false, "Succesfully uploaded image");
+            }
+            else {
+                return new RegularError(true, response.ReasonPhrase);
+            }
+        }
+
+        /// <summary>
         /// Add one or more tracks to a user’s playlist.
         /// Note that local tracks can’t be added.
         ///  Adding tracks to the current user's public playlists requires authorization of the playlist-modify-public scope; 
