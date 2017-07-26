@@ -71,6 +71,7 @@ Currently Implements the following endpoints:
 * [Set Repeat Mode On User’s Playback](https://developer.spotify.com/web-api/set-repeat-mode-on-users-playback/)
 * [Set Volume For User’s Playback](https://developer.spotify.com/web-api/set-volume-for-users-playback/)
 * [Toggle Shuffle For User’s Playback ](https://developer.spotify.com/web-api/toggle-shuffle-for-users-playback/)
+* [Upload a Custom Playlist Cover Image](https://developer.spotify.com/web-api/upload-a-custom-playlist-cover-image/)
 
 The following endpoints are not yet implemeted:
 * [Get recommendations based on seeds](https://developer.spotify.com/get-recommendations/)
