@@ -101,8 +101,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="token"></param>
         public Playlist(JToken token) {
             /* Simple fields */
-            Collaborative = token.Value<bool?>("collaborative ") ?? false;
-            Description = token.Value<string>("description ") ?? string.Empty;
+            Collaborative = token.Value<bool?>("collaborative") ?? false;
+            Description = token.Value<string>("description") ?? string.Empty;
             Href = token.Value<string>("href") ?? string.Empty;
             Id = token.Value<string>("id") ?? string.Empty;
             Name = token.Value<string>("name") ?? string.Empty;
@@ -137,9 +137,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
             /* Owner Handling */
             JToken owner = token.Value<JToken>("owner");
-            if(owner != null) {
+            if(owner != null && owner.HasValues) {
                 Owner = new User(owner);
             }
+            
 
             /* Track Handling */
             JObject tracks = token.Value<JObject>("tracks");
