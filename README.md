@@ -93,11 +93,9 @@ string Client_Id = "<your client id>";
 string Client_Secret = "<your client secret>";
 string Redirect_URI = "<your redirect uri>";
 List<SpotifyScopeEnum> Scopes = new List<SpotifyScopEnum>(){
-	<...>,
 	SpotifyScopeEnum.PLAYLIST_READ_PRIVATE,
     SpotifyScopeEnum.STREAMING,
     SpotifyScopeEnum.USER_LIBRARY_MODIFY,
-    <...>,
 };
 
 //Use the AuthorizationInProgress to send the redirect url to spotify and get user authentication
