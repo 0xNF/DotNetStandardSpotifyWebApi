@@ -4,11 +4,10 @@
 
 Compatible with .NET Core, ASP.NET Core, and UWP.  
 
-#### 90% Complete  
+#### 91% Complete  
 Todo:   
-* Implement the remaining 6 endpoints  
-* Make Authorization easier  
-* Add useful helper methods  
+* Implement the Search and Playlist Track Remove endpoints 
+* Make Authorization easier
   
 
 #### Available Endpoints
@@ -72,6 +71,7 @@ Currently Implements the following endpoints:
 * [Set Volume For User’s Playback](https://developer.spotify.com/web-api/set-volume-for-users-playback/)
 * [Toggle Shuffle For User’s Playback ](https://developer.spotify.com/web-api/toggle-shuffle-for-users-playback/)
 * [Upload a Custom Playlist Cover Image](https://developer.spotify.com/web-api/upload-a-custom-playlist-cover-image/)
+* [Available Genre Seeds](https://developer.spotify.com/web-api/get-recommendations/#available-genre-seeds)
 
 The following endpoints are not yet implemeted:
 * [Get recommendations based on seeds](https://developer.spotify.com/get-recommendations/)
