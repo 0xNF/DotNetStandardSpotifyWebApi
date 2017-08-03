@@ -590,7 +590,8 @@ namespace DotNetStandardSpotifyWebApi.Tests {
         [Fact]
         public async void ShouldGetAvailableSeedGenres() {
             await SetupCredentials();
-            IEnumerable<string> genres = await Endpoints.GetAvailableGenreSeeds(Creds.Access_token);
+            SpotifyList<string> genres = await Endpoints.GetAvailableGenreSeeds(Creds.Access_token);
+            Assert.False(genres.WasError, "Expected to get genre seeds, but got an error instead");
         }
 
         [Fact]

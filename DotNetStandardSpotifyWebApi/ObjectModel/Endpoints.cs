@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using DotNetStandardSpotifyWebApi.Helpers;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public static class Endpoints {
@@ -792,13 +793,9 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// </summary>
         /// <param name="accessToken">OAuth access token</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<string>> GetAvailableGenreSeeds(string accessToken) {
+        public static async Task<SpotifyList<string>> GetAvailableGenreSeeds(string accessToken) {
             string endpoint = $"https://api.spotify.com/v1/recommendations/available-genre-seeds";
-            //TODO this is incorrect - its just a list of strings, but DoSeveral goes through an ISpotify generator.
-            //Need something simpler.
-            //In addition, spotify has an inconsistent encoding - this particular endpoint is returning UTF8, instead of utf-8. Causes method to crash
-            return new List<string>();
-            //return await DoSeveralHttp<string>(endpoint, "genres", accessToken);
+            return await DoHTTP<SpotifyList<string>>(endpoint, accessToken, "genres");
         }
 
 
@@ -818,7 +815,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             string options = EncodeRequestParams(paramDict);
             string req = endpoint + options;
             return await DoHTTP<Paging<Artist>>(req, accessToken, "artists");
-            throw new NotImplementedException("NYI");
         }
         public static async Task<Paging<Album>> SearchAlbums(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
             string endpoint = "https://api.spotify.com/v1/search";

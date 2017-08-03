@@ -22,4 +22,46 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public interface ISpotifyObject {
     }
 
+
+    /// <summary>
+    /// Wrapper for strings or other such primitives that Spotify may return, but which we would like to return to the enduser as a RegularError
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class SpotifyList<T> : SpotifyObjectModel, ISpotifyObject {
+
+        public IReadOnlyList<T> Items { get; } = new List<T>();
+        
+
+        /// <summary>
+        /// Error Constructor
+        /// </summary>
+        /// <param name="wasError"></param>
+        /// <param name="errorMessage"></param>
+        public SpotifyList(bool wasError, string errorMessage) {
+            this.WasError = wasError;
+            this.ErrorMessage = errorMessage;
+        }
+
+        /// <summary>
+        /// Empty Constructor
+        /// </summary>
+        public SpotifyList() {
+
+        }
+
+        /// <summary>
+        /// JSON constructor
+        /// </summary>
+        /// <param name="token"></param>
+        public SpotifyList(JToken token) {
+            List<T> items = new List<T>();
+            IEnumerable<JToken> tokenvalues =token.Values();
+            foreach(JToken val in tokenvalues) {
+                T v = val.ToObject<T>();
+                items.Add(v);
+            }
+            this.Items = items;
+        }
+    }
+
 }

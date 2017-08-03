@@ -152,6 +152,15 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
             else if (t == typeof(FeaturedPlaylists)) {
                 return (tk) => { return new FeaturedPlaylists(tk); };
             }
+            else if(t == typeof(SpotifyList<string>)) {
+                return (tk) => { return new SpotifyList<string>(tk); };
+            }
+            else if (t == typeof(SpotifyList<bool>)) {
+                return (tk) => { return new SpotifyList<bool>(tk); };
+            }
+            else if (t == typeof(SpotifyList<int>)) {
+                return (tk) => { return new SpotifyList<int>(tk); };
+            }
             else {
                 return (tk) => {
                     throw new ArgumentException($"No generator exists for the supplied type: {t}");
