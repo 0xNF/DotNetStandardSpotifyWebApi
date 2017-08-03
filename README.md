@@ -118,7 +118,7 @@ OAuthCredentials token = await AuthorizationCodeFlow.GetSpotifyTokenCredentials(
 ```c#
 //With a refresh token
 string refresh_token = "<your refresh token>";
-OAuthCredentials refreshed = AuthorizationCodeFlow.RefreshAccessToken(<refresh_token>, Client_Id, Client_Secret);
+OAuthCredentials refreshed = AuthorizationCodeFlow.RefreshAccessToken(refresh_token, Client_Id, Client_Secret);
 //With an OAuthCredentials
 OAuthCredentials creds = <Credentials Object with expired access token>;
 creds = AuthorizationCodeFlow.RefreshAccessToken(expired, Client_Id, Client_Secret);
