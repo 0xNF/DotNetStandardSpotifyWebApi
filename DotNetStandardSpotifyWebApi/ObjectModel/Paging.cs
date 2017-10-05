@@ -54,7 +54,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// JToken constructor
         /// </summary>
         /// <param name="token"></param>
-        internal Paging(JToken token) {
+        public Paging(JToken token) {
             Href = token.Value<string>("href") ?? string.Empty;
             Total = token.Value<int?>("total") ?? 0;
             Limit = token.Value<int?>("limit") ?? 0;

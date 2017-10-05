@@ -85,7 +85,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// JToken constructor
         /// </summary>
         /// <param name="token"></param>
-        internal User(JToken token) {
+        public User(JToken token) {
             /* Simple fields */
             Birthdate = token.Value<string>("birthdate") ?? string.Empty;
             Country = token.Value<string>("country") ?? string.Empty;

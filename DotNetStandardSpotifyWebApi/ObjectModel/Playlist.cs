@@ -144,12 +144,14 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
             /* Track Handling */
             JObject tracks = token.Value<JObject>("tracks");
-            Total = tracks.Value<int?>("total") ?? -1;
-            IEnumerable<JToken> trackValues = tracks.Values().ToList();
-            // >2 properties means its really full of tracks
-            if(tracks.Values().Count() > 2) {
-                //TODO handle tracks
-                //Paging a bitch, yo
+            if (tracks != null) {
+                Total = tracks?.Value<int?>("total") ?? -1;
+                IEnumerable<JToken> trackValues = tracks?.Values().ToList();
+                // >2 properties means its really full of tracks
+                if (tracks.Values().Count() > 2) {
+                    //TODO handle tracks
+                    //Paging a bitch, yo
+                }
             }
         }
 
