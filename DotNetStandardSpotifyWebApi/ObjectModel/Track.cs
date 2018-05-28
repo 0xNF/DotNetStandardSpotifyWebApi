@@ -188,5 +188,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             this.WasError = wasError;
             this.ErrorMessage = errorMessage;
         }
+
     }
 }

@@ -154,7 +154,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         public const double Valence_Max = 1;
         public const double Valence_Min = 0;
 
-
         /// <summary>
         /// JToken constructor
         /// </summary>
@@ -183,7 +182,23 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Empty constructor
         /// </summary>
         public AudioFeatures() {
+            Acousticness = -1;
+            Danceability = -1;
+            Duration_MS = -1;
+            Energy = -1;
+            Instrumentalness = -1;
+            Key = -1;
+            Liveness = -1;
+            Loudness = -1;
+            Mode = -1;
+            Speechiness = -1;
+            Tempo = -1;
+            Time_Signature = -1;
+            Valence = -1;
+        }
 
+        public AudioFeatures(string id) : base() {
+            this.Id = id;
         }
 
         /// <summary>

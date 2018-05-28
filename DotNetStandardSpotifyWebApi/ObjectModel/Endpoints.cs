@@ -7,8 +7,111 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using DotNetStandardSpotifyWebApi.Helpers;
+using System.Net;
+using DotNetStandardSpotifyWebApi.Authorization;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
+
+    /// <summary>
+    /// Class containing either the Spotify Item returned, or the error messages from an unsuccessful request.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class WebResult<T> {
+        /// <summary>
+        /// Whether this request to Spotify succeeded or not.
+        /// If true, then Item will be set with the corresponding T type.
+        /// If false, Item will be null.
+        /// </summary>
+        public bool Succeeded { get; }
+        /// <summary>
+        /// Response code of the Spotify request
+        /// useful for determinig Bad Requests (300) or Rate Limited (429)
+        /// </summary>
+        public int ResponseCode { get; }
+        /// <summary>
+        /// Message to give to caller about the function.
+        /// On failure this field is the response message, on success it may include how many items were added
+        /// </summary>
+        public string ResponseMessage { get; }
+        /// <summary>
+        /// Etag string for caching. After most GET requests, an Etag value is returned.
+        /// Calllers can store this value and supplit it for further calls to check if their cached version remains valid
+        /// </summary>
+        public System.Net.Http.Headers.EntityTagHeaderValue ETag { get; }
+        /// <summary>
+        /// The T object specified by the WebResult. If the call failed, this field is null.
+        /// </summary>
+        public T Item { get; }
+
+        /// <summary>
+        /// OK - The request has succeeded. The client can read the result of the request in the body and the headers of the response.
+        /// </summary>
+        public bool IsOK => this.ResponseCode == 200;
+        /// <summary>
+        /// Created - The request has been fulfilled and resulted in a new resource being created.
+        /// </summary>
+        public bool IsCreated => this.ResponseCode == 201;
+        /// <summary>
+        /// Accepted - The request has been accepted for processing, but the processing has not been completed.
+        /// </summary>
+        public bool IsAccepted => this.ResponseCode == 202;
+        /// <summary>
+        /// No Content - The request has succeeded but returns no message body.
+        /// </summary>
+        public bool IsNoContent => this.ResponseCode == 204;
+        /// <summary>
+        /// Not Modified. See Conditional requests.
+        /// </summary>
+        public bool IsNotModified => this.ResponseCode == 304;
+        /// <summary>
+        /// Bad Request - The request could not be understood by the server due to malformed syntax. The message body will contain more information; see Error Details.
+        /// </summary>
+        public bool IsBadRequest => this.ResponseCode == 400;
+        /// <summary>
+        /// Unauthorized - The request requires user authentication or, if the request included authorization credentials, authorization has been refused for those credentials.
+        /// </summary>
+        public bool IsUnauthorized => this.ResponseCode == 401;
+        /// <summary>
+        /// Forbidden - The server understood the request, but is refusing to fulfill it.
+        /// </summary>
+        public bool IsForbidden => this.ResponseCode == 403;
+        /// <summary>
+        /// Not Found - The requested resource could not be found. This error can be due to a temporary or permanent condition.
+        /// </summary>
+        public bool IsNotFound => this.ResponseCode == 404;
+        /// <summary>
+        /// Too Many Requests - Rate limiting has been applied.
+        /// </summary>
+        public bool IsRateLimited => this.ResponseCode == 429;
+        /// <summary>
+        /// Internal Server Error - Please send a bug report to Spotify
+        /// </summary>
+        public bool IsInternalServerError => this.ResponseCode == 500;
+        /// <summary>
+        /// Bad Gateway - The server was acting as a gateway or proxy and received an invalid response from the upstream server.
+        /// </summary>
+        public bool IsBadGateWay => this.ResponseCode == 502;
+        /// <summary>
+        /// Service Unavailable - The server is currently unable to handle the request due to a temporary condition which will be alleviated after some delay. You can choose to resend the request again.
+        /// </summary>
+        public bool IsServiceUnavailable => this.ResponseCode == 503;
+
+        public WebResult(bool successful, int responseCode, string resposneMessage, System.Net.Http.Headers.EntityTagHeaderValue etag, T item) {
+            this.Succeeded = successful;
+            this.ResponseCode = responseCode;
+            this.ResponseMessage = ResponseMessage;
+            this.ETag = etag;
+            this.Item = item;
+        }
+        public WebResult(bool wasError, HttpStatusCode responseCode, string resposneMessage, System.Net.Http.Headers.EntityTagHeaderValue etag, T item) {
+            this.Succeeded = wasError;
+            this.ResponseCode = (int)responseCode;
+            this.ResponseMessage = ResponseMessage;
+            this.ETag = etag;
+            this.Item = item;
+        }
+    }
+
     public static class Endpoints {
 
         /// <summary>
@@ -18,7 +121,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="id">Album Id</param>
         /// <param name="market">Market result is desired in</param>
         /// <returns></returns>
-        public static async Task<Album> GetAnAlbum(string accessToken, string id, string market = "") {
+        public static async Task<WebResult<Album>> GetAnAlbum(string accessToken, string id, string market = "") {
             string endpoint = $"https://api.spotify.com/v1/albums/{id}";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"market",market}
@@ -36,7 +139,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="ids">List of Album Ids to get</param>
         /// <param name="market">Market results are desired in</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<Album>> GetSeveralAlbums(string accessToken, IEnumerable<string> ids, string market = "") {
+        public static async Task<WebResult<IEnumerable<Album>>> GetSeveralAlbums(string accessToken, IEnumerable<string> ids, string market = "") {
             int maxparams = 20;
             string endpoint = "https://api.spotify.com/v1/albums/?ids={0}";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -56,7 +159,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="offset">Optional. The index of the first track to return. Default: 0 (the first object). Use with limit to get the next set of tracks. </param>
         /// <param name="market">Optional. An ISO 3166-1 alpha-2 country code. Provide this parameter if you want to apply Track Relinking.</param>
         /// <returns></returns>
-        public static async Task<Paging<Track>> GetAnAlbumsTracks(string accessToken, string id, int limit = 20, int offset = 0, string market = "") {
+        public static async Task<WebResult<Paging<Track>>> GetAnAlbumsTracks(string accessToken, string id, int limit = 20, int offset = 0, string market = "") {
             string endpoint = "https://api.spotify.com/v1/albums/{0}/tracks";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"market", market},
@@ -74,7 +177,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="id">The Spotify ID for the artist.</param>
         /// <returns></returns>
-        public static async Task<Artist> GetAnArtist(string accessToken, string id) {
+        public static async Task<WebResult<Artist>> GetAnArtist(string accessToken, string id) {
             string endpoint = "https://api.spotify.com/v1/artists/{0}";
             string req = string.Format(endpoint, id);
             return await DoHTTP<Artist>(req, accessToken);
@@ -86,7 +189,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">Required. A list of the Spotify IDs for the artists. Maximum: 50 IDs.</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<Artist>> GetSeveralArtists(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<IEnumerable<Artist>>> GetSeveralArtists(string accessToken, IEnumerable<string> ids) {
             int maxparams = 50;
             string endpoint = "https://api.spotify.com/v1/artists?ids={0}";
             string req = string.Format(endpoint, string.Join(",",ids.Take(maxparams)));
@@ -106,7 +209,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="limit">Optional. The number of album objects to return. Default: 20. Minimum: 1. Maximum: 50. For example: limit=2</param>
         /// <param name="offset">Optional. The index of the first album to return. Default: 0 (i.e., the first album). Use with limit to get the next set of albums. </param>
         /// <returns></returns>
-        public static async Task<Paging<Album>> GetArtistsAlbums(string accessToken, string id, string album_type = "", string market = "", int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<Album>>> GetArtistsAlbums(string accessToken, string id, string album_type = "", string market = "", int limit = 20, int offset = 0) {
             string endpoint = $"https://api.spotify.com/v1/artists/{id}/albums";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"market", market},
@@ -126,7 +229,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="id">The Spotify ID for the artist.</param>
         /// <param name="country">Required. The country: an ISO 3166-1 alpha-2 country code. </param>
         /// <returns></returns>
-        public static async Task<IEnumerable<Track>> GetArtistsTopTracks(string accessToken, string id, string country="US") {
+        public static async Task<WebResult<IEnumerable<Track>>> GetArtistsTopTracks(string accessToken, string id, string country="US") {
             string endpoint = $"https://api.spotify.com/v1/artists/{id}/top-tracks";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"country", country}
@@ -142,7 +245,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="id">The Spotify ID for the artist.</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<Artist>> GetRelatedArtists(string accessToken, string id) {
+        public static async Task<WebResult<IEnumerable<Artist>>> GetRelatedArtists(string accessToken, string id) {
             string endpoint = $"https://api.spotify.com/v1/artists/{id}/related-artists";
             return await DoSeveralHttp<Artist>(endpoint, "artists", accessToken);
         }
@@ -153,7 +256,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="id">Required. A valid access token from the Spotify Accounts service: see the Web API Authorization Guide for details.</param>
         /// <returns></returns>
-        public static async Task<AudioAnalysis> GetAudioAnalysis(string accessToken, string id) {
+        public static async Task<WebResult<AudioAnalysis>> GetAudioAnalysis(string accessToken, string id) {
             string endpoint = $"https://api.spotify.com/v1/audio-analysis/{id}";
             return await DoHTTP<AudioAnalysis>(endpoint, accessToken);
         }
@@ -164,7 +267,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="id">Required. A valid access token from the Spotify Accounts service: see the Web API Authorization Guide for details.</param>
         /// <returns></returns>
-        public static async Task<AudioFeatures> GetAudioFeatures(string accessToken, string id) {
+        public static async Task<WebResult<AudioFeatures>> GetAudioFeatures(string accessToken, string id) {
             string endpoint = $"https://api.spotify.com/v1/audio-features/{id}";
             return await DoHTTP<AudioFeatures>(endpoint, accessToken);
         }
@@ -175,7 +278,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">Required. A list of the Spotify IDs for the tracks. Maximum: 100 IDs.</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<AudioFeatures>> GetSeveralAudioFeatures(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<IEnumerable<AudioFeatures>>> GetSeveralAudioFeatures(string accessToken, IEnumerable<string> ids) {
             int maxparams = 100;
             string endpoint = "https://api.spotify.com/v1/audio-features/?ids={0}";
             string req = string.Format(endpoint, string.Join(",", ids.Take(maxparams)));
@@ -197,7 +300,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="limit">Optional. The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50. </param>
         /// <param name="offset">Optional. The index of the first item to return. Default: 0 (the first object). Use with limit to get the next set of items. </param>
         /// <returns></returns>
-        public static async Task<FeaturedPlaylists> GetFeaturedPlaylists(string accessToken, string locale = "", string country = "", string timestamp = "", int limit = 20, int offset = 0) {
+        public static async Task<WebResult<FeaturedPlaylists>> GetFeaturedPlaylists(string accessToken, string locale = "", string country = "", string timestamp = "", int limit = 20, int offset = 0) {
             string endpoint = "https://api.spotify.com/v1/browse/featured-playlists";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"country", country},
@@ -219,7 +322,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="limit">Optional. The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50. </param>
         /// <param name="offset">Optional. The index of the first item to return. Default: 0 (the first object). Use with limit to get the next set of items. </param>
         /// <returns></returns>
-        public static async Task<Paging<Album>> GetNewReleases(string accessToken, string country = "", int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<Album>>> GetNewReleases(string accessToken, string country = "", int limit = 20, int offset = 0) {
             string endpoint = "https://api.spotify.com/v1/browse/new-releases";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"country", country},
@@ -240,7 +343,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="limit">Optional. The maximum number of categories to return. Default: 20. Minimum: 1. Maximum: 50. </param>
         /// <param name="offset">Optional. The index of the first item to return. Default: 0 (the first object). Use with limit to get the next set of categories. </param>
         /// <returns></returns>
-        public static async Task<Paging<Category>> GetCategories(string accessToken, string locale = "", string country = "", int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<Category>>> GetCategories(string accessToken, string locale = "", string country = "", int limit = 20, int offset = 0) {
             string endpoint = "https://api.spotify.com/v1/browse/categories";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"country", country},
@@ -261,7 +364,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="country">Optional. A country: an ISO 3166-1 alpha-2 country code. Provide this parameter to ensure that the category exists for a particular country.</param>
         /// <param name="locale">Optional. The desired language, consisting of an ISO 639 language code and an ISO 3166-1 alpha-2 country code, joined by an underscore. For example: es_MX, meaning "Spanish (Mexico)". Provide this parameter if you want the category strings returned in a particular language.   Note that, if locale is not supplied, or if the specified language is not available, the category strings returned will be in the Spotify default language (American English).</param>
         /// <returns></returns>
-        public static async Task<Category> GetACategory(string accessToken, string category_id, string country = "", string locale = "") {
+        public static async Task<WebResult<Category>> GetACategory(string accessToken, string category_id, string country = "", string locale = "") {
             string endpoint = $"https://api.spotify.com/v1/browse/categories/{category_id}";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"country", country},
@@ -281,7 +384,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="limit">Optional. The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50. </param>
         /// <param name="offset">Optional. The index of the first item to return. Default: 0 (the first object). Use with limit to get the next set of items. </param>
         /// <returns></returns>
-        public static async Task<Paging<Playlist>> GetACategorysPlaylists(string accessToken, string category_id, string country = "", int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<Playlist>>> GetACategorysPlaylists(string accessToken, string category_id, string country = "", int limit = 20, int offset = 0) {
             string endpoint = $"https://api.spotify.com/v1/browse/categories/{category_id}";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"country", country},
@@ -299,7 +402,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// </summary>
         /// <param name="accessToken">OAuth access token</param>
         /// <returns></returns>
-        public static async Task<User> GetCurrentUser(string accessToken) {
+        public static async Task<WebResult<User>> GetCurrentUser(string accessToken) {
             string endpoint = "https://api.spotify.com/v1/me";
             return await DoHTTP<User>(endpoint, accessToken);
         }
@@ -312,7 +415,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="limit">Optional. The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50. </param>
         /// <param name="after">Optional. The last artist ID retrieved from the previous request.</param>
         /// <returns></returns>
-        public static async Task<CursorBasedPaging<Artist>> GetUsersFollowedArtists(string accessToken, int limit = 20, string after = "") {
+        public static async Task<WebResult<CursorBasedPaging<Artist>>> GetUsersFollowedArtists(string accessToken, int limit = 20, string after = "") {
             string type = "artist";
             string endpoint = $"https://api.spotify.com/v1/me/following";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -332,7 +435,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">A list of the artist Spotify IDs. A maximum of 50 IDs can be sent in one request.</param>
         /// <returns></returns>
-        public static async Task<RegularError> FollowArtists(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<bool>> FollowArtists(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/following";
             string type = "artist";
             int maxParams = 50;
@@ -356,7 +459,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">A list of the user Spotify IDs. A maximum of 50 IDs can be sent in one request.</param>
         /// <returns></returns>
-        public static async Task<RegularError> FollowUsers(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<bool>> FollowUsers(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/following";
             string type = "user";
             int maxParams = 50;
@@ -380,7 +483,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">A list of the artist or the user Spotify IDs.</param>
         /// <returns></returns>
-        public static async Task<RegularError> UnfollowArtists(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<bool>> UnfollowArtists(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/following";
             string type = "artist";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -403,7 +506,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">A list of the artist or the user Spotify IDs.</param>
         /// <returns></returns>
-        public static async Task<RegularError> UnfollowUsers(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<bool>> UnfollowUsers(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/following";
             string type = "user";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -426,7 +529,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="artist_ids">Required. A list of the artist Spotify IDs to check.  A maximum of 50 IDs can be sent in one request.</param>
         /// <returns>List of true or false values, in the same order in which the ids were specified. </returns>
-        public static async Task<IReadOnlyList<bool>> CheckCurrentUserFollowsArtists(string accessToken, IEnumerable<string> artist_ids) {
+        public static async Task<WebResult<IReadOnlyList<bool>>> CheckCurrentUserFollowsArtists(string accessToken, IEnumerable<string> artist_ids) {
             int maxparams = 50;
             string endpoint = "https://api.spotify.com/v1/me/following/contains";
             string type = "artist";
@@ -446,7 +549,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="user_ids">Required. A list of the user Spotify IDs to check.  A maximum of 50 IDs can be sent in one request.</param>
         /// <returns>List of true or false values, in the same order in which the ids were specified. </returns>
-        public static async Task<IReadOnlyList<bool>> CheckCurrentUserFollowsUsers(string accessToken, IEnumerable<string> user_ids) {
+        public static async Task<WebResult<IReadOnlyList<bool>>> CheckCurrentUserFollowsUsers(string accessToken, IEnumerable<string> user_ids) {
             int maxparams = 50;
             string endpoint = "https://api.spotify.com/v1/me/following/contains";
             string type = "user";
@@ -468,7 +571,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="playlist_id">The Spotify ID of the playlist. Any playlist can be followed, regardless of its public/private status, as long as you know its playlist ID.</param>
         /// <param name="isPublic">Optional, default true. If true the playlist will be included in user's public playlists, if false it will remain private. To be able to follow playlists privately, the user must have granted the playlist-modify-private scope.</param>
         /// <returns></returns>
-        public static async Task<RegularError> FollowAPlaylist(string accessToken, string owner_id, string playlist_id, bool isPublic = true) {
+        public static async Task<WebResult<bool>> FollowAPlaylist(string accessToken, string owner_id, string playlist_id, bool isPublic = true) {
             string endpoint = $"https://api.spotify.com/v1/users/{owner_id}/playlists/{playlist_id}/followers";
             Dictionary<string, object> putItems = new Dictionary<string, object>() {
                 {"public", isPublic }
@@ -485,16 +588,24 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="owner_id">The Spotify user ID of the person who owns the playlist.</param>
         /// <param name="playlist_id">The Spotify ID of the playlist that is to be no longer followed.</param>
         /// <returns></returns>
-        public static async Task<RegularError> UnfollowAPlaylist(string accessToken, string owner_id, string playlist_id) {
+        public static async Task<WebResult<bool>> UnfollowAPlaylist(string accessToken, string owner_id, string playlist_id) {
             string endpoint = $"https://api.spotify.com/v1/users/{owner_id}/playlists/{playlist_id}/followers";
             HttpRequestMessage message = SetupRequest(endpoint, accessToken, HttpMethod.Delete);
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new RegularError(false, $"successfully unfollowed playlist {playlist_id}");
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, $"successfully unfollowed playlist {playlist_id}", response.Headers.ETag, true);
             }
-            else {
-                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
+            else if (response.StatusCode == HttpStatusCode.BadRequest) {
+                JObject jobj = JObject.Parse(response.Content.ToString());
+                string revoked = jobj.Value<string>("error");
+                if (!string.IsNullOrWhiteSpace(revoked)) {
+                    throw new TokenRevokedException();
+                }
             }
+            else if ((int)response.StatusCode == 429) {
+                throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
+            }
+            return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
         }
 
         /// <summary>
@@ -505,7 +616,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="playlist_id">The Spotify ID of the playlist.</param>
         /// <param name="user_ids">A list of Spotify User ids that you want to check to see if they follow the playlist. Maximum 5 ids</param>
         /// <returns></returns>
-        public static async Task<IReadOnlyList<bool>> CheckUsersFollowsPlaylist(string accessToken, string owner_id, string playlist_id, IEnumerable<string> user_ids) {
+        public static async Task<WebResult<IReadOnlyList<bool>>> CheckUsersFollowsPlaylist(string accessToken, string owner_id, string playlist_id, IEnumerable<string> user_ids) {
             int maxParams = 5;
             string endpoint = $"https://api.spotify.com/v1/users/{owner_id}/playlists/{playlist_id}/followers/contains";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -524,7 +635,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">A list of the Spotify IDs.</param>
         /// <returns></returns>
-        public static async Task<RegularError> SaveTracksForUser(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<bool>> SaveTracksForUser(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/tracks";
             int maxparams = 50;
             string[] idarr = ids.Take(maxparams).ToArray();
@@ -535,10 +646,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(putObject.ToString());
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new RegularError(false, $"successfully saved {idarr.Length} tracks");
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, true);
             }
             else {
-                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 
@@ -550,7 +661,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="offset">Optional. The index of the first object to return. Default: 0 (i.e., the first object). Use with limit to get the next set of objects. </param>
         /// <param name="market">Optional. An ISO 3166-1 alpha-2 country code. Provide this parameter if you want to apply Track Relinking.</param>
         /// <returns></returns>
-        public static async Task<Paging<SavedTrack>> GetUsersSavedTracks(string accessToken, int limit = 20, int offset = 0, string market = "") {
+        public static async Task<WebResult<Paging<SavedTrack>>> GetUsersSavedTracks(string accessToken, int limit = 20, int offset = 0, string market = "", string etag = "") {
             string endpoint = "https://api.spotify.com/v1/me/tracks";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"limit", limit},
@@ -559,7 +670,12 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             };
             string options = EncodeRequestParams(paramDict);
             string req = string.Format(endpoint) + options;
-            return await DoHTTP<Paging<SavedTrack>>(req, accessToken);
+
+            System.Net.Http.Headers.EntityTagHeaderValue etagval = null;
+            if (!String.IsNullOrWhiteSpace(etag)) {
+                etagval = new System.Net.Http.Headers.EntityTagHeaderValue(etag);
+            }
+            return await DoHTTP<Paging<SavedTrack>>(req, accessToken, etagval);
         }
 
         /// <summary>
@@ -569,7 +685,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">A list of Spotify Ids</param>
         /// <returns></returns>
-        public static async Task<RegularError> RemoveUsersSavedTracks(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<bool>> RemoveUsersSavedTracks(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/tracks";
             int maxParams = 50;
             string[] idArr = ids.Take(maxParams).ToArray();
@@ -580,10 +696,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(putObject.ToString());
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new RegularError(false, $"successfully removed {idArr.Length} tracks from users library");
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, $"successfully removed {idArr.Length} tracks from users library", response.Headers.ETag, true);
             }
             else {
-                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 
@@ -594,7 +710,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">List of Spotify Ids</param>
         /// <returns></returns>
-        public static async Task<IReadOnlyList<bool>> CheckUsersSavedTracks(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<IReadOnlyList<bool>>> CheckUsersSavedTracks(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/tracks/contains";
             int maxParams = 50;
             string[] idArr = ids.Take(maxParams).ToArray();
@@ -613,7 +729,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">List of Spotify Ids</param>
         /// <returns></returns>
-        public static async Task<RegularError> SaveAlbumsForUser(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<bool>> SaveAlbumsForUser(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/albums";
             int maxparams = 50;
             string[] idarr = ids.Take(maxparams).ToArray();
@@ -624,10 +740,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(putObject.ToString());
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new RegularError(false, $"successfully saved {idarr.Length} albums");
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, $"successfully saved {idarr.Length} albums", response.Headers.ETag, true);
             }
             else {
-                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 
@@ -639,7 +755,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="offset">Optional. The index of the first object to return. Default: 0 (i.e., the first object). Use with limit to get the next set of objects. </param>
         /// <param name="market">Optional. An ISO 3166-1 alpha-2 country code. Provide this parameter if you want to apply Track Relinking.</param>
         /// <returns></returns>
-        public static async Task<Paging<SavedAlbum>> GetUsersSavedAlbums(string accessToken, int limit = 20, int offset = 0, string market = "") {
+        public static async Task<WebResult<Paging<SavedAlbum>>> GetUsersSavedAlbums(string accessToken, int limit = 20, int offset = 0, string market = "") {
             string endpoint = "https://api.spotify.com/v1/me/albums";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"limit", limit},
@@ -659,7 +775,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">List of Spotify Ids</param>
         /// <returns></returns>
-        public static async Task<RegularError> RemoveAlbumsForCurrentUser(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<bool>> RemoveAlbumsForCurrentUser(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/albums";
             int maxParams = 50;
             string[] idArr = ids.Take(maxParams).ToArray();
@@ -670,10 +786,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(putObject.ToString());
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new RegularError(false, $"successfully removed {idArr.Length} albums from users library");
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, $"successfully removed {idArr.Length} albums from users library", response.Headers.ETag, true);
             }
             else {
-                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
+                return new WebResult<bool>(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 
@@ -683,7 +799,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="ids">List of Spotify Ids</param>
         /// <returns></returns>
-        public static async Task<IReadOnlyList<bool>> CheckUsersSavedAlbums(string accessToken, IEnumerable<string> ids) {
+        public static async Task<WebResult<IReadOnlyList<bool>>> CheckUsersSavedAlbums(string accessToken, IEnumerable<string> ids) {
             string endpoint = "https://api.spotify.com/v1/me/albums/contains";
             int maxParams = 50;
             string[] idArr = ids.Take(maxParams).ToArray();
@@ -717,7 +833,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="offset">Optional. The index of the first entity to return. Default: 0 (i.e., the first track). Use with limit to get the next set of entities.</param>
         /// <param name="time_range">Optional. Over what time frame the affinities are computed. Valid values: long_term (calculated from several years of data and including all new data as it becomes available), medium_term (approximately last 6 months), short_term (approximately last 4 weeks). Default: medium_term. </param>
         /// <returns></returns>
-        public static async Task<Paging<Artist>> GetUsersTopArtists(string accessToken, int limit = 20, int offset=0, string time_range = "medium_term") {
+        public static async Task<WebResult<Paging<Artist>>> GetUsersTopArtists(string accessToken, int limit = 20, int offset=0, string time_range = "medium_term") {
             string type = "artists";
             string endpoint = $"https://api.spotify.com/v1/me/top/{type}";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -751,7 +867,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="offset">Optional. The index of the first entity to return. Default: 0 (i.e., the first track). Use with limit to get the next set of entities.</param>
         /// <param name="time_range">Optional. Over what time frame the affinities are computed. Valid values: long_term (calculated from several years of data and including all new data as it becomes available), medium_term (approximately last 6 months), short_term (approximately last 4 weeks). Default: medium_term. </param>
         /// <returns></returns>
-        public static async Task<Paging<Track>> GetUsersTopTracks(string accessToken, int limit = 20, int offset = 0, string time_range = "medium_term") {
+        public static async Task<WebResult<Paging<Track>>> GetUsersTopTracks(string accessToken, int limit = 20, int offset = 0, string time_range = "medium_term") {
             string type = "tracks";
             string endpoint = $"https://api.spotify.com/v1/me/top/{type}";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -793,16 +909,15 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// </summary>
         /// <param name="accessToken">OAuth access token</param>
         /// <returns></returns>
-        public static async Task<SpotifyList<string>> GetAvailableGenreSeeds(string accessToken) {
+        public static async Task<WebResult<SpotifyList<string>>> GetAvailableGenreSeeds(string accessToken) {
             string endpoint = $"https://api.spotify.com/v1/recommendations/available-genre-seeds";
-            return await DoHTTP<SpotifyList<string>>(endpoint, accessToken, "genres");
+            return await DoHTTP<SpotifyList<string>>(endpoint, accessToken, key:"genres");
         }
-
 
         //TODO Search
         //Also complicated
         //What to do about the query param.
-        public static async Task<Paging<Artist>> SearchArtists(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<Artist>>> SearchArtists(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
             string endpoint = "https://api.spotify.com/v1/search";
             string type = "artist";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -814,9 +929,9 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             };
             string options = EncodeRequestParams(paramDict);
             string req = endpoint + options;
-            return await DoHTTP<Paging<Artist>>(req, accessToken, "artists");
+            return await DoHTTP<Paging<Artist>>(req, accessToken, key:"artists");
         }
-        public static async Task<Paging<Album>> SearchAlbums(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<Album>>> SearchAlbums(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
             string endpoint = "https://api.spotify.com/v1/search";
             string type = "album";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -828,10 +943,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             };
             string options = EncodeRequestParams(paramDict);
             string req = endpoint + options;
-            return await DoHTTP<Paging<Album>>(req, accessToken, "albums");
+            return await DoHTTP<Paging<Album>>(req, accessToken, key:"albums");
             throw new NotImplementedException("NYI");
         }
-        public static async Task<Paging<Playlist>> SearchPlaylists(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<Playlist>>> SearchPlaylists(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
             string endpoint = "https://api.spotify.com/v1/search";
             string type = "playlist";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -843,10 +958,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             };
             string options = EncodeRequestParams(paramDict);
             string req = endpoint + options;
-            return await DoHTTP<Paging<Playlist>>(req, accessToken, "playlists");
+            return await DoHTTP<Paging<Playlist>>(req, accessToken, key:"playlists");
             throw new NotImplementedException("NYI");
         }
-        public static async Task<Paging<Track>> SearchTracks(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<Track>>> SearchTracks(string accessToken, string query, string market = "", int limit = 20, int offset = 0) {
             string endpoint = "https://api.spotify.com/v1/search";
             string type = "track";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
@@ -858,7 +973,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             };
             string options = EncodeRequestParams(paramDict);
             string req = endpoint + options;
-            return await DoHTTP<Paging<Track>>(req, accessToken, "tracks");
+            return await DoHTTP<Paging<Track>>(req, accessToken, key:"tracks");
             throw new NotImplementedException("NYI");
         }
 
@@ -870,7 +985,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="id">The Spotify ID for the track.</param>
         /// <param name="market">Optional. An ISO 3166-1 alpha-2 country code. Provide this parameter if you want to apply Track Relinking.</param>
         /// <returns></returns>
-        public static async Task<Track> GetATrack(string accessToken, string id, string market = "") {
+        public static async Task<WebResult<Track>> GetATrack(string accessToken, string id, string market = "") {
                 string endpoint = $"https://api.spotify.com/v1/tracks/{id}";
                 Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                     {"market",market },
@@ -890,7 +1005,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="ids">A List of Spotify Ids</param>
         /// <param name="market">Optional. An ISO 3166-1 alpha-2 country code. Provide this parameter if you want to apply Track Relinking.</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<Track>> GetSeveralTracks(string accessToken, IEnumerable<string> ids, string market = "") {
+        public static async Task<WebResult<IEnumerable<Track>>> GetSeveralTracks(string accessToken, IEnumerable<string> ids, string market = "") {
             string type = "tracks";
             string endpoint = "https://api.spotify.com/v1/tracks";
             int maxParams = 50;
@@ -910,7 +1025,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="user_id">The user's Spotify user ID.</param>
         /// <returns></returns>
-        public static async Task<User> GetUsersProfile(string accessToken, string user_id) {
+        public static async Task<WebResult<User>> GetUsersProfile(string accessToken, string user_id) {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}";
             return await DoHTTP<User>(endpoint, accessToken);
         }
@@ -929,7 +1044,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="limit">Optional. The maximum number of playlists to return. Default: 20. Minimum: 1. Maximum: 50. </param>
         /// <param name="offset">Optional. The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with limit to get the next set of playlists. </param>
         /// <returns></returns>
-        public static async Task<Paging<Playlist>> GetUsersPlaylists(string accessToken, string user_id, int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<Playlist>>> GetUsersPlaylists(string accessToken, string user_id, int limit = 20, int offset = 0) {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"limit",limit },
@@ -952,7 +1067,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="limit">Optional. The maximum number of playlists to return. Default: 20. Minimum: 1. Maximum: 50. </param>
         /// <param name="offset">Optional. The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with limit to get the next set of playlists. </param>
         /// <returns></returns>
-        public static async Task<Paging<Playlist>> GetCurrentUsersPlaylists(string accessToken, int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<Playlist>>> GetCurrentUsersPlaylists(string accessToken, int limit = 20, int offset = 0, System.Net.Http.Headers.EntityTagHeaderValue Etag = null) {
             string endpoint = $"https://api.spotify.com/v1/me/playlists";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"limit",limit },
@@ -960,7 +1075,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             };
             string options = EncodeRequestParams(paramDict);
             string req = endpoint + options;
-            return await DoHTTP<Paging<Playlist>>(req, accessToken);
+            return await DoHTTP<Paging<Playlist>>(req, accessToken, etag:Etag);
         }
 
         /// <summary>
@@ -982,7 +1097,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// </param>
         /// <param name="market">Optional. An ISO 3166-1 alpha-2 country code. Provide this parameter if you want to apply Track Relinking.</param>
         /// <returns></returns>
-        public static async Task<Playlist> GetAPlaylist(string accessToken, string user_id, string playlist_id, string fields = "", string market = "") {
+        public static async Task<WebResult<Playlist>> GetAPlaylist(string accessToken, string user_id, string playlist_id, string fields = "", string market = "") {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"fields",fields},
@@ -1014,7 +1129,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="limit">Optional. The maximum number of tracks to return. Default: 100. Minimum: 1. Maximum: 100. </param>
         /// <param name="offset">Optional. The index of the first track to return. Default: 0 (the first object). </param>
         /// <returns></returns>
-        public static async Task<Paging<PlaylistTrack>> GetAPlaylistsTracks(string accessToken, string user_id, string playlist_id, string fields = "", string market = "", int limit = 20, int offset = 0) {
+        public static async Task<WebResult<Paging<PlaylistTrack>>> GetAPlaylistsTracks(string accessToken, string user_id, string playlist_id, string fields = "", string market = "", int limit = 20, int offset = 0) {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"fields",fields},
@@ -1040,7 +1155,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="isPublic">Optional, default true. If true the playlist will be public, if false it will be private. To be able to create private playlists, the user must have granted the playlist-modify-private scope.</param>
         /// <param name="isCollaborative">Optional, default false. If true the playlist will be collaborative. Note that to create a collaborative playlist you must also set public to false.</param>
         /// <returns></returns>
-        public static async Task<Playlist> CreateAPlaylist(string accessToken, string user_id, string name, string description = "", bool isPublic = true, bool isCollaborative = false) {
+        public static async Task<WebResult<Playlist>> CreateAPlaylist(string accessToken, string user_id, string name, string description = "", bool isPublic = true, bool isCollaborative = false) {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists";
             Dictionary<string, object> putItems = new Dictionary<string, object>() {
                 {"name",name},
@@ -1059,11 +1174,19 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if (response.IsSuccessStatusCode) {
                 string content = await response.Content.ReadAsStringAsync();
                 JObject token = JObject.Parse(content);
-                return new Playlist(token);
+                return new WebResult<Playlist>(response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, new Playlist(token));
             }
-            else {
-                return new Playlist(true, response.ReasonPhrase);
+            else if (response.StatusCode == HttpStatusCode.BadRequest) {
+                JObject jobj = JObject.Parse(response.Content.ToString());
+                string revoked = jobj.Value<string>("error");
+                if (!string.IsNullOrWhiteSpace(revoked)) {
+                    throw new TokenRevokedException();
+                }
             }
+            else if ((int)response.StatusCode == 429) {
+                throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
+            }
+            return new WebResult<Playlist>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, null);
         }
 
         /// <summary>
@@ -1079,7 +1202,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="name">Optional. The new name for the playlist, for example "My New Playlist Title".</param>
         /// <param name="description">Optional, value for playlist description as displayed in Spotify Clients and in the Web API.</param>
         /// <returns></returns>
-        public static async Task<RegularError> ChangePlaylistDetails(string accessToken, string user_id, string playlist_id, bool? isPublic, bool? isCollaborative, string name = "", string description = "") {
+        public static async Task<WebResult<bool>> ChangePlaylistDetails(string accessToken, string user_id, string playlist_id, bool? isPublic, bool? isCollaborative, string name = "", string description = "") {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}";
             Dictionary<string, object> putItems = new Dictionary<string, object>();
             if (!string.IsNullOrWhiteSpace(name)) {
@@ -1095,7 +1218,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 putItems.Add("collaborative", isCollaborative);
             }
             if (!putItems.Any()) {
-                return new RegularError(true, "no fields to modifiy");
+                return new WebResult<bool>(true, 200, "no fields to modifiy", null, true);
             }
 
             JObject putObject = JObject.FromObject(putItems);
@@ -1106,12 +1229,19 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(putObject.ToString());
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new RegularError(false, "Succesfully modified playlist");
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode,"Succesfully modified playlist", response.Headers.ETag, true);
             }
-            else {
-                return new RegularError(true, response.ReasonPhrase);
-
+            else if (response.StatusCode == HttpStatusCode.BadRequest) {
+                JObject jobj = JObject.Parse(response.Content.ToString());
+                string revoked = jobj.Value<string>("error");
+                if (!string.IsNullOrWhiteSpace(revoked)) {
+                    throw new TokenRevokedException();
+                }
             }
+            else if ((int)response.StatusCode == 429) {
+                throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
+            }
+            return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
         }
 
         /// <summary>
@@ -1129,7 +1259,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="playlist_id"></param>
         /// <param name="b64_imageData">Base64 encoded JPEG image data, maximum payload size is 256 KB</param>
         /// <returns></returns>
-        public static async Task<RegularError> UploadCustomPlaylistCoverimage(string accessToken, string user_id, string playlist_id, string b64_imageData) {
+        public static async Task<WebResult<bool>> UploadCustomPlaylistCoverimage(string accessToken, string user_id, string playlist_id, string b64_imageData) {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/images";
             HttpRequestMessage message = SetupRequest(endpoint, accessToken, HttpMethod.Put);
             message.Headers.Accept.Clear();
@@ -1137,10 +1267,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(b64_imageData);
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new RegularError(false, "Succesfully uploaded image");
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode,"Succesfully uploaded image", response.Headers.ETag, true);
             }
             else {
-                return new RegularError(true, response.ReasonPhrase);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 
@@ -1162,7 +1292,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// If omitted, the tracks will be appended to the playlist.
         /// Tracks are added in the order they are listed in the query string or request body.</param>
         /// <returns></returns>
-        public static async Task<RegularError> AddTracksToPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<string> uris, int? position = null) {
+        public static async Task<WebResult<string>> AddTracksToPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<string> uris, int? position = null) {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
             int maxParams = 100;
             string[] uriArr = uris.Take(maxParams).ToArray();
@@ -1183,10 +1313,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
                 string content = await response.Content.ReadAsStringAsync();
-                return new RegularError(false, content);
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, content, response.Headers.ETag, content);
             }
             else {
-                return new RegularError(true, response.ReasonPhrase);
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
             }
         }
 
@@ -1201,7 +1331,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="playlist_id">The Spotify ID for the playlist.</param>
         /// <param name="uris">Spotify URIs to add. NOTE: This is the whole Spotify URI, not just the track id</param>
         /// <returns></returns>
-        public static async Task<RegularError> RemoveTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<string> uris) {
+        public static async Task<WebResult<string>> RemoveTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<string> uris) {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
             int maxParams = 100;
             IEnumerable<JObject> jobjss = uris.Take(maxParams).Select(x => JObject.FromObject(new Dictionary<string, string>() { { "uri", x } }));
@@ -1217,25 +1347,25 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if (response.IsSuccessStatusCode) {
                 string content = await response.Content.ReadAsStringAsync();
                 JObject jobj = JObject.Parse(content);
-                return new RegularError(false, jobj.Value<string>("snapshot_id"));
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, jobj.Value<string>("snapshot_id"));
             }
             else {
-                return new RegularError(true, response.ReasonPhrase);
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
             }
 
         }
 
-        public static async Task<RegularError> RemoveSpecificOccurranceOfTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<Tuple<string, string>> uris) {
+        public static async Task<WebResult<bool>> RemoveSpecificOccurranceOfTracksFromPlaylist(string accessToken, string user_id, string playlist_id, IEnumerable<Tuple<string, string>> uris) {
             await Task.Delay(1);
             throw new NotImplementedException("NYI");
         }
 
-        public static async Task<RegularError> RemoveSpecificOccuranceInSpecificSnapshotOfPlaylist(string accessToken, string user_id, string playlist_id, string snapshot_id) {
+        public static async Task<WebResult<bool>> RemoveSpecificOccuranceInSpecificSnapshotOfPlaylist(string accessToken, string user_id, string playlist_id, string snapshot_id) {
             await Task.Delay(1);
             throw new NotImplementedException("NYI");
         }
 
-        public static async Task<RegularError> RemoveTrackAtPositionInPlaylistSnapshot(string accessToken, string user_id, string playlist_id, string snapshot_id) {
+        public static async Task<WebResult<bool>> RemoveTrackAtPositionInPlaylistSnapshot(string accessToken, string user_id, string playlist_id, string snapshot_id) {
             await Task.Delay(1);
             throw new NotImplementedException("NYI");
         }
@@ -1264,7 +1394,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         ///  </param>
         /// <param name="snapshot_id">Optional. The playlist's snapshot ID against which you want to make the changes. </param>
         /// <returns></returns>
-        public static async Task<RegularError> ReorderPlaylistsTracks(string accessToken, string user_id, string playlist_id, int range_start, int insert_before, int range_length = 1, string snapshot_id = "") {
+        public static async Task<WebResult<string>> ReorderPlaylistsTracks(string accessToken, string user_id, string playlist_id, int range_start, int insert_before, int range_length = 1, string snapshot_id = "") {
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
             Dictionary<string, object> messageBody = new Dictionary<string, object>() {
                 {"range_start", range_start },
@@ -1283,10 +1413,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if (response.IsSuccessStatusCode) {
                 string content = await response.Content.ReadAsStringAsync();
                 JObject jobj = JObject.Parse(content);
-                return new RegularError(false, jobj.Value<string>("snapshot_id"));
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, jobj.Value<string>("snapshot_id"));
             }
             else {
-                return new RegularError(true, response.ReasonPhrase);
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
             }
 
         }
@@ -1304,7 +1434,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="playlist_id">The Spotify ID for the playlist.</param>
         /// <param name="uris">A list of Spotify URIs to set. Maximum of 100 per request</param>
         /// <returns></returns>
-        public static async Task<RegularError> ReplacePlaylistTracks(string accessToken, string user_id, string playlist_id, IEnumerable<string> uris) {
+        public static async Task<WebResult<string>> ReplacePlaylistTracks(string accessToken, string user_id, string playlist_id, IEnumerable<string> uris) {
             int maxParams = 100;
             string endpoint = $"https://api.spotify.com/v1/users/{user_id}/playlists/{playlist_id}/tracks";
             Dictionary<string, object> messageBody = new Dictionary<string, object>() {
@@ -1320,10 +1450,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if (response.IsSuccessStatusCode) {
                 string content = await response.Content.ReadAsStringAsync();
                 JObject jobj = JObject.Parse(content);
-                return new RegularError(false, jobj.Value<string>("snapshot_id"));
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, jobj.Value<string>("snapshot_id"));
             }
             else {
-                return new RegularError(true, response.ReasonPhrase);
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
             }
         }
 
@@ -1346,7 +1476,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="after">Optional. A Unix timestamp in milliseconds. Returns all items after (but not including) this cursor position. If after is specified, before must not be specified.</param>
         /// <param name="before">Optional. A Unix timestamp in milliseconds. Returns all items before (but not including) this cursor position. If before is specified, after must not be specified.</param>
         /// <returns></returns>
-        public static async Task<CursorBasedPaging<PlayHistory>> GetCurrentUsersRecentlyPlayedTracks(string accessToken, int limit = 20, long? after = null, long? before = null ) {
+        public static async Task<WebResult<CursorBasedPaging<PlayHistory>>> GetCurrentUsersRecentlyPlayedTracks(string accessToken, int limit = 20, long? after = null, long? before = null ) {
             if(after.HasValue && before.HasValue) {
                 throw new ArgumentException("After and Before cannot both be specified. Please only specify one or the other.");
             }
@@ -1383,7 +1513,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             throw new HttpRequestException("Failed to get users devices. See inner exception for more details", new Exception(response.ReasonPhrase));
         }
 
-        public static async Task<CurrentlyPlayingContext> GetUsersCurrentlyPlayingInformation(string accessToken, string market = "") {
+        public static async Task<WebResult<CurrentlyPlayingContext>> GetUsersCurrentlyPlayingInformation(string accessToken, string market = "") {
             string endpoint = "https://api.spotify.com/v1/me/player";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"market", market }
@@ -1407,7 +1537,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Note: Although an array is accepted, only a single device_id is currently supported. Supplying more than one will return 400 Bad Request</param>
         /// <param name="play">Optional:  true: ensure playback happens on new device; false or not provided: keep the current playback state.</param>
         /// <returns></returns>
-        public static async Task<RegularError> TransferUsersPlayback(string accessToken, IEnumerable<string> device_ids, bool play = false) {
+        public static async Task<WebResult<bool>> TransferUsersPlayback(string accessToken, IEnumerable<string> device_ids, bool play = false) {
             string endpoint = "https://api.spotify.com/v1/me/player";
             Dictionary<string, object> messageBody = new Dictionary<string, object>() {
                 { "device_ids", JArray.FromObject(device_ids)},
@@ -1428,7 +1558,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="uris">Optional: List of the Spotify track URIs to play.</param>
         /// <param name="offset">Optional.String Or Int. Indicates from where in the context playback should start. Only available when context_uri corresponds to an album or playlist object, or when the uris parameter is used.</param>
         /// <returns></returns>
-        public static async Task<RegularError> StartOrResumePlayback(string accessToken, string device_id="", string context_uri = "", IEnumerable<string> uris = null, object offset= null) {
+        public static async Task<WebResult<bool>> StartOrResumePlayback(string accessToken, string device_id="", string context_uri = "", IEnumerable<string> uris = null, object offset= null) {
             if(!string.IsNullOrEmpty(context_uri) && uris != null) {
                 throw new ArgumentException("uris and context_uri cannot both be defined. Please select one or the other.");
             }
@@ -1484,7 +1614,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
         /// <returns></returns>
-        public static async Task<RegularError> PauseUsersPlayback(string accessToken, string device_id = "") {
+        public static async Task<WebResult<bool>> PauseUsersPlayback(string accessToken, string device_id = "") {
             string endpoint = "https://api.spotify.com/v1/me/player/pause";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"device_id", device_id }
@@ -1504,7 +1634,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
         /// <returns></returns>
-        public static async Task<RegularError> SkipPlaybackToUsersNextTrack(string accessToken, string device_id = "") {
+        public static async Task<WebResult<bool>> SkipPlaybackToUsersNextTrack(string accessToken, string device_id = "") {
             string endpoint = "https://api.spotify.com/v1/me/player/next";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"device_id", device_id }
@@ -1525,7 +1655,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="accessToken">OAuth access token</param>
         /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
         /// <returns></returns>
-        public static async Task<RegularError> SkipPlaybackToUsersPreviousTrack(string accessToken, string device_id = "") {
+        public static async Task<WebResult<bool>> SkipPlaybackToUsersPreviousTrack(string accessToken, string device_id = "") {
             string endpoint = "https://api.spotify.com/v1/me/player/previous";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"device_id", device_id }
@@ -1545,7 +1675,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="position_ms">Required. The position in milliseconds to seek to. Must be a positive number. Passing in a position that is greater than the length of the track will cause the player to start playing the next song.</param>
         /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
         /// <returns></returns>
-        public static async Task<RegularError> SeekToPositionInCurrentlyPlayingTrack(string accessToken, long position_ms, string device_id = "") {
+        public static async Task<WebResult<bool>> SeekToPositionInCurrentlyPlayingTrack(string accessToken, long position_ms, string device_id = "") {
             if (position_ms < 0) {
                 throw new ArgumentException("position_ms must be a positive int or long.");
             }
@@ -1566,7 +1696,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="position_ms">Required. The position in milliseconds to seek to. Must be a positive number. Passing in a position that is greater than the length of the track will cause the player to start playing the next song.</param>
         /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
         /// <returns></returns>
-        public static async Task<RegularError> SetRepeatModeOnUsersPlayback(string accessToken, RepeatEnum state, string device_id = "") {
+        public static async Task<WebResult<bool>> SetRepeatModeOnUsersPlayback(string accessToken, RepeatEnum state, string device_id = "") {
             string endpoint = "https://api.spotify.com/v1/me/player/repeat";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"state", state.Name},
@@ -1584,7 +1714,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="position_ms">Required. Integer. The volume to set. Must be a value from 0 to 100 inclusive.</param>
         /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
         /// <returns></returns>
-        public static async Task<RegularError> SetVolumeOnUsersPlayback(string accessToken, int volume_percent, string device_id = "") {
+        public static async Task<WebResult<bool>> SetVolumeOnUsersPlayback(string accessToken, int volume_percent, string device_id = "") {
             if(volume_percent < 0 || volume_percent > 100) {
                 throw new ArgumentException("Volume percent must be a positive integer between 0 and 100, inclusive.");
             }
@@ -1605,7 +1735,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="shuffle">True: Shuffle On. False: Shuffle off</param>
         /// <param name="device_id">Optional. The id of the device this command is targeting. If not supplied, the user's currently active device is the target.</param>
         /// <returns></returns>
-        public static async Task<RegularError> SetShuffleOnPlayback(string accessToken, bool shuffle, string device_id = "") {
+        public static async Task<WebResult<bool>> SetShuffleOnPlayback(string accessToken, bool shuffle, string device_id = "") {
             string endpoint = "https://api.spotify.com/v1/me/player/shuffle";
             Dictionary<string, object> paramDict = new Dictionary<string, object>() {
                 {"state", shuffle},

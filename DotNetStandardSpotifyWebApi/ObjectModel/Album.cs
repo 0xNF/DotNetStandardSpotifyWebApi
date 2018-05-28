@@ -104,6 +104,45 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
 
         /// <summary>
+        /// Field constructor
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="album_type"></param>
+        /// <param name="artists"></param>
+        /// <param name="markets"></param>
+        /// <param name="copyrights"></param>
+        /// <param name="external_ids"></param>
+        /// <param name="external_urls"></param>
+        /// <param name="genres"></param>
+        /// <param name="href"></param>
+        /// <param name="images"></param>
+        /// <param name="label"></param>
+        /// <param name="name"></param>
+        /// <param name="popularity"></param>
+        /// <param name="release_date"></param>
+        /// <param name="release_date_precision"></param>
+        /// <param name="tracks"></param>
+        public Album(string id, string album_type, Artist[] artists, string[] markets, Copyright[] copyrights, Dictionary<string, string> external_ids, Dictionary<string, string> external_urls, string[] genres, string href, Image[] images, string label, string name, int popularity, string release_date, string release_date_precision, Paging<Track> tracks) {
+            this.Id = id;
+            this.Album_Type = album_type;
+            this.Artists = artists;
+            this.Available_Markets = markets;
+            this.Copyrights = copyrights;
+            this.External_Ids = external_ids;
+            this.External_Urls = external_urls;
+            this.Genres = genres;
+            this.Href = href;
+            this.Images = images;
+            this.Label = label;
+            this.Name = name;
+            this.Popularity = popularity;
+            this.Release_Date = release_date;
+            this.Release_Date_Precision = release_date_precision;
+            this.Tracks = tracks;
+
+        }
+
+        /// <summary>
         /// JToken constructor
         /// </summary>
         /// <param name="token"></param>

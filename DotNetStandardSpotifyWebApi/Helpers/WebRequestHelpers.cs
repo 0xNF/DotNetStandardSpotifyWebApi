@@ -7,6 +7,8 @@ using Newtonsoft.Json.Linq;
 using DotNetStandardSpotifyWebApi.ObjectModel;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using DotNetStandardSpotifyWebApi.Authorization;
 
 namespace DotNetStandardSpotifyWebApi.Helpers {
     public static class WebRequestHelpers {
@@ -167,8 +169,11 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
                 };
             }
         }
-        internal static async Task<IReadOnlyList<bool>> DoHttpGetBools(string accessToken, string endpoint) {
+        internal static async Task<WebResult<IReadOnlyList<bool>>> DoHttpGetBools(string accessToken, string endpoint, EntityTagHeaderValue etag = null) {
             HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken);
+            if (etag != null) {
+                message.Headers.IfNoneMatch.Add(etag);
+            }
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
                 JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
@@ -178,17 +183,20 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
                     bool contains = jobj.Value<bool>();
                     lst.Add(contains);
                 }
-                return lst;
+                return new WebResult<IReadOnlyList<bool>>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, lst);
             }
             else {
-                throw new HttpRequestException($"Status Code: {response.StatusCode}, Message: {response.ReasonPhrase}");
+                return new WebResult<IReadOnlyList<bool>>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag,  null);
             }
 
         }
-        internal static async Task<T> DoHTTP<T>(string endpoint, string accessToken, string key = "") where T : ISpotifyObject {
+        internal static async Task<WebResult<T>> DoHTTP<T>(string endpoint, string accessToken, EntityTagHeaderValue etag = null, string key = "") where T : ISpotifyObject {
 
             Func<JToken, ISpotifyObject> generator = CreateSpotifyObjectGenerator(typeof(T));
             HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken);
+            if(etag != null) {
+                message.Headers.IfNoneMatch.Add(etag);
+            }
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
                 JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
@@ -196,30 +204,55 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
                     token = token.Value<JToken>(key);
                 }
                 T item = (T)generator(token);
-                return item;
+                return new WebResult<T>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, item);
             }
-            else {
-                return (T)generator("Error"); //TODO this is broken, yo
+            else if (response.StatusCode == HttpStatusCode.BadRequest) {
+                JObject jobj = JObject.Parse(response.Content.ToString());
+                string revoked = jobj.Value<string>("error");
+                if (!string.IsNullOrWhiteSpace(revoked)) {
+                    throw new TokenRevokedException();
+                }
             }
+            else if ((int)response.StatusCode == 429) {
+                throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
+            }
+            return new WebResult<T>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag,  default(T));
         }
-        internal static async Task<IEnumerable<T>> DoSeveralHttp<T>(string endpoint, string type, string accessToken) {
+        internal static async Task<WebResult<IEnumerable<T>>> DoSeveralHttp<T>(string endpoint, string type, string accessToken, EntityTagHeaderValue etag = null) {
             Func<JToken, ISpotifyObject> generator = CreateSpotifyObjectGenerator(typeof(T));
             HttpRequestMessage message = WebRequestHelpers.SetupRequest(endpoint, accessToken);
+            if (etag != null) {
+                message.Headers.IfNoneMatch.Add(etag);
+            }
             HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
                 JToken token = await WebRequestHelpers.ParseJsonResponse(response.Content);
                 JArray jarr = token.Value<JArray>(type);
-
                 List<T> lst = new List<T>();
-                foreach (JObject jobj in jarr) {
-                    T item = (T)generator(jobj);
-                    lst.Add(item);
+                foreach (JToken Jt in jarr) {
+                    if (Jt != null && Jt.Type == JTokenType.Object) {
+                        JObject jobj = Jt as JObject;
+                        T item = (T)generator(jobj);
+                        lst.Add(item);
+                    }
+                    else {
+                        lst.Add(default(T));
+                    }
                 }
-                return lst;
+                return new WebResult<IEnumerable<T>>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, lst);
+
             }
-            else {
-                throw new HttpRequestException(response.ReasonPhrase);
+            else if (response.StatusCode == HttpStatusCode.BadRequest) {
+                JObject jobj = JObject.Parse(response.Content.ToString());
+                string revoked = jobj.Value<string>("error");
+                if (!string.IsNullOrWhiteSpace(revoked)) {
+                    throw new TokenRevokedException();
+                }
             }
+            else if ((int)response.StatusCode == 429) {
+                throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
+            }
+            return new WebResult<IEnumerable<T>>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, null);
         }
         //TODO this is nasty
         internal static string EncodeRequestParams(Dictionary<string, object> reqParams) {
@@ -261,8 +294,11 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
             return req;
         }
 
-        internal static async Task<RegularError> DoMethod(string endpoint, string accessToken, string onSuccess, HttpMethod method, Dictionary<string, object> messageBody = null) {
+        internal static async Task<WebResult<bool>> DoMethod(string endpoint, string accessToken, string onSuccess, HttpMethod method, Dictionary<string, object> messageBody = null, EntityTagHeaderValue etag = null) {
             HttpRequestMessage message = SetupRequest(endpoint, accessToken, method);
+            if (etag != null) {
+                message.Headers.IfNoneMatch.Add(etag);
+            }
             if (messageBody != null && messageBody.Any()) {
                 JObject putObject = JObject.FromObject(messageBody);
                 message.Headers.Accept.Clear();
@@ -271,10 +307,10 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
             }
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new RegularError(false, onSuccess);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, true);
             }
             else {
-                return new RegularError(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 

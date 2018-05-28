@@ -86,7 +86,7 @@ namespace DotNetStandardSpotifyWebApi.Authorization {
 
         public static async Task<OAuthCredentials> RefreshAccessToken(string refreshToken, string clientId, string clientSecret){
             string postBody = $"grant_type=refresh_token&refresh_token={refreshToken}";
-            return await GetSpotifyCredentials(postBody, clientId, clientSecret, refreshToken);                         
+            return await GetSpotifyCredentials(postBody, clientId, clientSecret, refreshToken);
         }
 
         #region private helpers
@@ -95,20 +95,34 @@ namespace DotNetStandardSpotifyWebApi.Authorization {
             HttpRequestMessage request = WebRequestHelpers.SetupRequest(SpotifyAPITokenUrl, "Basic", b64, HttpMethod.Post);
             HttpContent content = new StringContent(PostBody, Encoding.UTF8, "application/x-www-form-urlencoded");
             request.Content = content;
-            HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(request);
-            if(response.IsSuccessStatusCode){
-                string jsonstring = await response.Content.ReadAsStringAsync();
-                JObject jobj = Newtonsoft.Json.Linq.JObject.Parse(jsonstring);
-                string accessToken = jobj.GetValue("access_token").ToString();
-                int expiresIn = Convert.ToInt32(jobj.GetValue("expires_in").ToString());
-                if(string.IsNullOrWhiteSpace(refreshToken)){
-                    refreshToken = jobj.GetValue("refresh_token").ToString();
+            try {
+                HttpResponseMessage response = await WebRequestHelpers.Client.SendAsync(request);
+                if (response.IsSuccessStatusCode) {
+                    string jsonstring = await response.Content.ReadAsStringAsync();
+                    JObject jobj = Newtonsoft.Json.Linq.JObject.Parse(jsonstring);
+                    string accessToken = jobj.GetValue("access_token").ToString();
+                    int expiresIn = Convert.ToInt32(jobj.GetValue("expires_in").ToString());
+                    if (string.IsNullOrWhiteSpace(refreshToken)) {
+                        refreshToken = jobj.GetValue("refresh_token").ToString();
+                    }
+                    return new OAuthCredentials("unknown user", accessToken, expiresIn, refreshToken);
                 }
-                return new OAuthCredentials("unknown user", accessToken, expiresIn, refreshToken);
-            }
-            else {
+                else if(response.StatusCode == HttpStatusCode.BadRequest) {
+                    JObject jobj = JObject.Parse(response.Content.ToString());
+                    string revoked = jobj.Value<string>("error");
+                    if (!string.IsNullOrWhiteSpace(revoked)){
+                        throw new TokenRevokedException();
+                    }
+                }
+                else if ((int)response.StatusCode == 429) {
+                    throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
+                }   
                 return OAuthCredentials.CrendentialError;
             }
+            catch(Exception e) {
+                return OAuthCredentials.CrendentialError;
+            }
+
         }
         #endregion
     }
