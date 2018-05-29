@@ -69,7 +69,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             Dictionary<string, object> keys = new Dictionary<string, object>() {
                 { "track", this.Track.ToSimpleJson() },
                 { "played_at", this.Played_At },
-                { "context", this.Context.toJson() }
+                { "context", this.Context.ToJson() }
             };
             return JObject.FromObject(keys);
         }
