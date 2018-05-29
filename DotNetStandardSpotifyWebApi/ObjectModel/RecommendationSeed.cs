@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     /// <summary>
@@ -68,6 +69,18 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             this.Id = token.Value<string>("id") ?? string.Empty;
             this.InitialPoolSize = token.Value<int?>("initialPoolSize") ?? -1;
             this.Type = token.Value<string>("type") ?? string.Empty;
+        }
+
+        public JToken ToJson() {
+            Dictionary<string, object> keys = new Dictionary<string, object>() {
+                { "afterFilteringSize", this.AfterFilteringSize },
+                { "afterRelinkingSize", this.AfterRelinkingSize },
+                { "href", this.Href },
+                { "id", this.Id },
+                { "initialPoolSize", this.InitialPoolSize },
+                { "type", this.Type }
+            };
+            return JObject.FromObject(keys);
         }
 
 

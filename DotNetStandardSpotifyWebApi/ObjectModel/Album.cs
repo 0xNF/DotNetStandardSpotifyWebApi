@@ -3,7 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
-    public class Album : SpotifyObjectModel, ISpotifyObject {
+    public class Album : SpotifyObjectModel, ISpotifyObject, ISimpleSpotifyObject, IFullSpotifyObject {
+
+        private readonly bool IsTrackRelinkingApplied = false;
+
+        /// <summary>
+        /// The field is present when getting an artist’s albums. 
+        /// Possible values are “album”, “single”, “compilation”, “appears_on”. 
+        /// Compare to album_type this field represents relationship between the artist and the album.
+        /// </summary>
+        public string Album_Group { get; } = null;
 
         /// <summary>
         /// The type of the album: one of "album", "single", or "compilation". 
@@ -85,6 +94,13 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// The precision with which release_date value is known: "year", "month", or "day".
         /// </summary>  bj
         public string Release_Date_Precision { get; } = string.Empty;
+
+        /// <summary>
+        /// Part of the response when Track Relinking is applied, the original track is not available in the given market, and Spotify did not have any tracks to relink it with. 
+        /// The track response will still contain metadata for the original track, and a restrictions object containing the reason why the track is not available:
+        /// "restrictions" : {"reason" : "market"}
+        /// </summary>
+        public Restriction Restrictions { get; } 
 
         /// <summary>
         /// The tracks of the album.
@@ -228,6 +244,12 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 Tracks = new Paging<Track>(paging);
             }
 
+            // Restrictions
+            JToken restrictions = token.Value<JToken>("restrictions");
+            if(restrictions != null) {
+                Restrictions = new Restriction(restrictions);
+            }
+
         }
 
         /// <summary>
@@ -245,6 +267,65 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         public Album(bool wasError, string errorMessage) {
             this.WasError = wasError;
             this.ErrorMessage = errorMessage;
+        }
+
+
+        public JObject ToAlbumArtistsJson() {
+            JObject simple = ToSimpleJson();
+            simple.Add("album_group", this.Album_Group);
+            return simple;
+        }
+
+        public JObject ToSimpleJson() {
+            JArray jartists = new JArray();
+            foreach(Artist a in this.Artists) {
+                jartists.Add(a.ToSimpleJson());
+            }
+            JArray jimages = new JArray();
+            foreach (Image i in this.Images) {
+                jimages.Add(i.ToJson());
+            }
+            Dictionary<string, object> keys = new Dictionary<string, object>() {
+                { "album_type", this.Album_Type },
+                { "artists", jartists },
+                { "available_markets", JArray.FromObject(this.Available_Markets) },
+                { "external_urls",  JObject.FromObject(this.External_Urls) },
+                { "href", this.Href },
+                { "id", this.Id },
+                { "images", jimages },
+                { "name", this.Name },
+                { "release_date", this.Release_Date },
+                { "release_date_precision", this.Release_Date_Precision },
+                { "type", this.Type },
+                { "uri", this.Uri }
+            };
+
+            if (IsTrackRelinkingApplied) {
+                keys.Add("restrictions", this.Restrictions.ToJson());
+            }
+
+            return JObject.FromObject(keys);
+        }
+
+        public JObject ToFullJson() {
+            JObject simple = this.ToSimpleJson();
+            JArray jcopy = new JArray();
+            foreach(Copyright cr in this.Copyrights) {
+                jcopy.Add(cr.ToJson());
+            }
+            simple.Add("copyrights", jcopy);
+            simple.Add("external_ids", JObject.FromObject(this.External_Ids));
+            simple.Add("external_urls", JObject.FromObject(this.External_Urls));
+            simple.Add("genres", JArray.FromObject(this.Genres));
+            simple.Add("label", this.Label);
+            simple.Add("popularity", this.Popularity);
+            simple.Add("tracks", this.Tracks.ToJson());
+
+            return simple;
+        }
+
+        public JToken ToJson() {
+            return ToFullJson();
         }
     }
 }

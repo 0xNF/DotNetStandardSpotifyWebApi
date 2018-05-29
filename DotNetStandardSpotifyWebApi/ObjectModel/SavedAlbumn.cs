@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class SavedAlbum : SpotifyObjectModel, ISpotifyObject {
@@ -39,6 +40,14 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if (album != null) {
                 Album = new Album(album);
             }
+        }
+
+        public JToken ToJson() {
+            Dictionary<string, object> keys = new Dictionary<string, object>() {
+                { "added_at", this.Added_At },
+                { "album", this.Album.ToFullJson() }
+            };
+            return JObject.FromObject(keys);
         }
 
     }

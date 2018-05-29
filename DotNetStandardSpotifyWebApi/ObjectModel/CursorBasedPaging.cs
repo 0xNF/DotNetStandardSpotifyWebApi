@@ -113,5 +113,21 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             return null;
         }
 
+        public JToken ToJson() {
+            JArray jitems = new JArray();
+            foreach(T item in this.Items) {
+                jitems.Add(item.ToJson());
+            }
+            Dictionary<string, object> keys = new Dictionary<string, object>() {
+                { "href", this.Href },
+                { "limit", this.Limit },
+                { "Next", this.Next },
+                { "total", this.Total },
+                { "cursors", this.Cursors.ToJson() },
+                { "items",  jitems}
+            };
+            return JObject.FromObject(keys);
+        }
+
     }
 }

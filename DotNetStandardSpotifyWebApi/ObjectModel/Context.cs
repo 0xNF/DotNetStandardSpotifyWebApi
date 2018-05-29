@@ -70,6 +70,16 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             Uri = uri;
             External_Urls = external_urls;
         }
+
+        public JToken ToJson() {
+            Dictionary<string, object> keys = new Dictionary<string, object>() {
+                { "type", this.Type },
+                { "uri", this.Uri },
+                { "href", this.Href },
+                { "external_urls", JObject.FromObject(this.External_Urls) }
+            };
+            return JObject.FromObject(keys);
+        }
     }
 
 }

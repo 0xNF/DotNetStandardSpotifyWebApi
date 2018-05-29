@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class Device : SpotifyObjectModel, ISpotifyObject {
@@ -61,6 +62,17 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             Is_Restricted = token.Value<bool?>("is_restricted") ?? true;
             Name = token.Value<string>("name") ?? string.Empty;
             Type = token.Value<string>("type") ?? string.Empty;
+        }
+
+        public JToken ToJson() {
+            Dictionary<string, object> keys = new Dictionary<string, object>() {
+                { "id", this.Id },
+                { "is_active", this.Is_Active },
+                { "is_restricted", this.Is_Restricted },
+                { "name", this.Name },
+                { "type", this.Type }
+            };
+            return JObject.FromObject(keys);
         }
     }
 

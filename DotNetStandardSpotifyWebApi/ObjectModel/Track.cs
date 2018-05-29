@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
-    public class Track : SpotifyObjectModel, ISpotifyObject {
+    public class Track : SpotifyObjectModel, ISpotifyObject, ISimpleSpotifyObject, IFullSpotifyObject {
+
+        private readonly bool IsTrackRelinkingApplied = false;
 
         /// <summary>
         /// The album on which the track appears. 
@@ -70,6 +72,8 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// </summary>
         public TrackLink Linked_From { get; } = new TrackLink(true, "Default, not yet populated");
 
+
+
         /// <summary>
         /// The name of the track.
         /// </summary>
@@ -84,6 +88,13 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         ///  Note that the popularity value may lag actual popularity by a few days: the value is not updated in real time.
         /// </summary>
         public int Popularity { get; } = 0;
+
+        /// <summary>
+        /// Part of the response when Track Relinking is applied, the original track is not available in the given market, and Spotify did not have any tracks to relink it with. 
+        /// The track response will still contain metadata for the original track, and a restrictions object containing the reason why the track is not available:
+        /// "restrictions" : {"reason" : "market"}
+        /// </summary>
+        public Restriction Restrictions { get; }
 
         /// <summary>
         /// A link to a 30 second preview (MP3 format) of the track. Empty if not available.
@@ -170,6 +181,13 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             }
 
 
+            // Restrictions
+            JToken restrictions = token.Value<JToken>("restrictions");
+            if (restrictions != null) {
+                Restrictions = new Restriction(restrictions);
+            }
+
+
         }
 
         /// <summary>
@@ -187,6 +205,47 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         public Track(bool wasError, string errorMessage) {
             this.WasError = wasError;
             this.ErrorMessage = errorMessage;
+        }
+
+        public JObject ToSimpleJson() {
+
+            JArray jartists = new JArray();
+            foreach(Artist a in this.Artists) {
+                jartists.Add(a.ToSimpleJson());
+            }
+
+            Dictionary<string, object> keys = new Dictionary<string, object>() {
+                { "artists", jartists },
+                { "available_markets", JArray.FromObject(this.Available_Markets) },
+                { "disc_number", this.Disc_Number },
+                { "duration_ms", this.Duration_Ms },
+                { "explicit", this.Explicit },
+                { "external_urls", JObject.FromObject(this.External_Urls) },
+                { "href", this.Href },
+                { "id", this.Id },
+                { "name", this.Name },
+                { "preview_urls", this.Preview_Url },
+                { "track_number", this.Track_Number },
+                { "type", this.Type },
+                { "uri", this.Uri }
+            };
+            if (IsTrackRelinkingApplied) {
+                keys.Add("is_playable", this.Is_Playable);
+                keys.Add("linked_from", this.Linked_From.ToJson());
+                keys.Add("restrictions", this.Restrictions.ToJson());
+            }
+            return JObject.FromObject(keys);
+        }
+
+        public JObject ToFullJson() {
+            JObject simple = this.ToSimpleJson();
+            simple.Add("popularity", this.Popularity);
+            simple.Add("album", this.Album.ToSimpleJson());
+            return simple;
+        }
+
+        public JToken ToJson() {
+            return this.ToFullJson();
         }
 
     }

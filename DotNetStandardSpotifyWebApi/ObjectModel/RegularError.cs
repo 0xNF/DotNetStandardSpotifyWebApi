@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     /// <summary>
@@ -59,6 +60,15 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             Status = token.Value<int?>("status") ?? 0;
             Message = token.Value<string>("message") ?? string.Empty;
             ErrorMessage = Message;
+        }
+
+
+        public JToken ToJson() {
+            Dictionary<string, object> keys = new Dictionary<string, object>() {
+                { "status", Status },
+                { "message", this.Message}
+            };
+            return JObject.FromObject(keys);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     /// <summary>
@@ -47,6 +48,15 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             this.Height = token.Value<int?>("height") ?? 0;
             this.Width = token.Value<int?>("width") ?? 0;
             this.Url = token.Value<string>("url") ?? string.Empty;
+        }
+
+        public JToken ToJson() {
+            Dictionary<string, object> keys = new Dictionary<string, object>() {
+                { "height", this.Height },
+                { "width", this.Width},
+                { "url", this.Url }
+            };
+            return JObject.FromObject(keys);
         }
     }
 }

@@ -28,7 +28,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// The duration (in milliseconds)
         /// And the confidence score of the bar
         /// </summary>
-        public class Bar {
+        public class Bar  {
 
             /// <summary>
             /// Start time of this bar (in ms)
@@ -674,7 +674,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             }
         }
 
-        public JObject ToJson() {
+        public JToken ToJson() {
             Dictionary<string, JToken> keys = new Dictionary<string, JToken>() {
                 {"meta", this.Metadata.ToJson()},
                 {"track", this.Track.ToJson()}

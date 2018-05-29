@@ -2,7 +2,9 @@
 using Newtonsoft.Json.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
-    public class Artist : SpotifyObjectModel, ISpotifyObject {
+    public class Artist : SpotifyObjectModel, ISpotifyObject, ISimpleSpotifyObject, IFullSpotifyObject {
+
+        private readonly bool IsTrackRelinkingApplied = false;
 
         /// <summary>
         /// Known external URLs for this artist.
@@ -55,6 +57,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// The Spotify URI for the artist.
         /// </summary>
         public string Uri { get; } = string.Empty;
+
         
 
 
@@ -122,6 +125,37 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         public Artist(bool wasError, string errorMessage) {
             this.WasError = wasError;
             this.ErrorMessage = errorMessage;
+        }
+
+        public JObject ToSimpleJson() {
+            Dictionary<string, object> keys = new Dictionary<string, object>() {
+                { "external_urls",  JObject.FromObject(this.External_Urls) },
+                { "href", this.Href },
+                { "id", this.Id },
+                { "name", this.Name },
+                { "type", this.Type },
+                { "uri", this.Uri }
+            };
+            return JObject.FromObject(keys);
+        }
+
+        public JObject ToFullJson() {
+            JArray jimages = new JArray();
+            foreach (Image i in this.Images) {
+                jimages.Add(i.ToJson());
+            }
+
+            JObject simple = this.ToSimpleJson();
+            simple.Add("followers", this.Followers.ToJson());
+            simple.Add("genres", JArray.FromObject(this.Genres));
+            simple.Add("images", jimages);
+            simple.Add("popularity", this.Popularity);
+
+            return simple;
+        }
+
+        public JToken ToJson() {
+            return ToFullJson();
         }
     }
 }

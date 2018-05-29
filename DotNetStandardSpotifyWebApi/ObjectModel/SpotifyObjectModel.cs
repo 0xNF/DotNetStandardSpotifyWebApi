@@ -20,6 +20,15 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
     }
 
     public interface ISpotifyObject {
+        JToken ToJson();
+    }
+
+    public interface ISimpleSpotifyObject {
+        JObject ToSimpleJson();
+    }
+
+    public interface IFullSpotifyObject {
+        JObject ToFullJson();
     }
 
 
@@ -30,7 +39,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class SpotifyList<T> : SpotifyObjectModel, ISpotifyObject {
 
         public IReadOnlyList<T> Items { get; } = new List<T>();
-        
+
 
         /// <summary>
         /// Error Constructor
@@ -55,12 +64,20 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <param name="token"></param>
         public SpotifyList(JToken token) {
             List<T> items = new List<T>();
-            IEnumerable<JToken> tokenvalues =token.Values();
-            foreach(JToken val in tokenvalues) {
+            IEnumerable<JToken> tokenvalues = token.Values();
+            foreach (JToken val in tokenvalues) {
                 T v = val.ToObject<T>();
                 items.Add(v);
             }
             this.Items = items;
+        }
+
+        public JToken ToJson() {
+            JArray jarr = new JArray();
+            foreach(T t in Items) {
+                jarr.Add(t);
+            }
+            return jarr;
         }
     }
 
