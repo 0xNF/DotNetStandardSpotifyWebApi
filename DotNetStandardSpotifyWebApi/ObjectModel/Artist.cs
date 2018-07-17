@@ -111,6 +111,30 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         }
 
         /// <summary>
+        /// Fields constructor
+        /// </summary>
+        /// <param name="artistId"></param>
+        /// <param name="artistName"></param>
+        /// <param name="externalUrls"></param>
+        /// <param name="followers"></param>
+        /// <param name="genres"></param>
+        /// <param name="href"></param>
+        /// <param name="images"></param>
+        /// <param name="popularity"></param>
+        /// <param name="uri"></param>
+        public Artist(string artistId, string artistName, Dictionary<string, string> externalUrls, Followers followers, string[] genres, string href, Image[] images, int popularity, string uri) {
+            this.Id = artistId;
+            this.Name = artistName;
+            this.External_Urls = externalUrls;
+            this.Followers = followers;
+            this.Genres = genres;
+            this.Href = href;
+            this.Images = images;
+            this.Popularity = popularity;
+            this.Uri = uri;
+        }
+
+        /// <summary>
         /// Empty Constructor
         /// </summary>
         public Artist() {

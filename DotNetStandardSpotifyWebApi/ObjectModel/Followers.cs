@@ -22,11 +22,27 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel
         public int Total { get; } = 0;
 
 
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
+        public Followers() {
+
+        }
+
+        /// <summary>
+        /// Fields constructor
+        /// </summary>
+        /// <param name="href"></param>
+        /// <param name="total"></param>
         public Followers(string href, int total) {
             this.Href = href;
             this.Total = total;
         }
 
+        /// <summary>
+        /// Just total constructor
+        /// </summary>
+        /// <param name="total"></param>
         public Followers(int total) {
             this.Total = total;
         }

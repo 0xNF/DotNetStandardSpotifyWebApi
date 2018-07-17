@@ -64,14 +64,13 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Part of the response when Track Relinking is applied.
         /// If true, the track is playable in the given market. Otherwise false.
         /// </summary>
-        public bool Is_Playable { get; } = false;
+        public bool Is_Playable { get; } = true;
 
         /// <summary>
         /// Part of the response when Track Relinking is applied, and the requested track has been replaced with different track.
         /// The track in the linked_from object contains information about the originally requested track.
         /// </summary>
         public TrackLink Linked_From { get; } = new TrackLink(true, "Default, not yet populated");
-
 
 
         /// <summary>
@@ -128,7 +127,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             Duration_Ms = token.Value<long?>("duration_ms") ?? 0;
             Explicit = token.Value<bool?>("explicit") ?? false;
             Href = token.Value<string>("href") ?? string.Empty;
-            Is_Playable = token.Value<bool?>("is_playable") ?? false;
+            Is_Playable = token.Value<bool?>("is_playable") ?? true;
             Id = token.Value<string>("id") ?? string.Empty;
             Name = token.Value<string>("name") ?? string.Empty;
             Popularity = token.Value<int?>("popularity") ?? 0;
@@ -198,6 +197,26 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         }
 
         /// <summary>
+        /// Fields constructor
+        /// </summary>
+        public Track(string trackId, Artist[] artists, string[] availableMarkets, bool isPlayable, int discNumber, bool isExplicit, Dictionary<string, string> externalIds, string href, string name, string previewUrl, int trackNumber, string uri, int popularity) {
+            this.Id = trackId;
+            this.Artists = artists;
+            this.Available_Markets = availableMarkets;
+            this.Disc_Number = discNumber;
+            this.Explicit = isExplicit;
+            this.External_Ids = externalIds;
+            this.Href = href;
+            this.Name = name;
+            this.Preview_Url = previewUrl;
+            this.Track_Number = trackNumber;
+            this.Uri = uri;
+            this.Popularity = popularity;
+            this.Restrictions = null;
+            this.Is_Playable = isPlayable;
+        }
+
+        /// <summary>
         /// Error constructor
         /// </summary>
         /// <param name="wasError"></param>
@@ -224,7 +243,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 { "href", this.Href },
                 { "id", this.Id },
                 { "name", this.Name },
-                { "preview_urls", this.Preview_Url },
+                { "preview_url", this.Preview_Url },
                 { "track_number", this.Track_Number },
                 { "type", this.Type },
                 { "uri", this.Uri }

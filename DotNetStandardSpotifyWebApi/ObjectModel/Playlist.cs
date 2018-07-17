@@ -156,6 +156,26 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         }
 
         /// <summary>
+        /// Fields Constructor
+        /// </summary>
+        public Playlist(string playlistId, string playlistName, string description, User owner, Followers followers, string snapshotId,  bool isPublic, bool isCollaborative, string href, string uri, Dictionary<string, string> externalUrls, IEnumerable<Image> images, Paging<PlaylistTrack> tracks) {
+            this.Collaborative = isCollaborative;
+            this.Description = description;
+            this.External_Urls = externalUrls;
+            this.Followers = followers;
+            this.Href = href;
+            this.Id = playlistId;
+            this.Images = images.ToArray();
+            this.Name = playlistName;
+            this.Owner = owner;
+            this.Public = isPublic;
+            this.Snapshot_Id = snapshotId;
+            this.Total = tracks?.Total ?? 0;
+            this.Uri = uri;
+            this.Tracks = tracks;
+        }
+
+        /// <summary>
         /// Error constructor
         /// </summary>
         /// <param name="wasError"></param>
