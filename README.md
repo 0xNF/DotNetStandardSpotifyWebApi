@@ -1,5 +1,8 @@
 # .NET Standard Spotify Web API
 
+Available on NuGet at
+https://www.nuget.org/packages/DotNetStandardSpotifyWebApi/0.1.0
+
 ### A C# wrapper for the Spotify Web API written for .Net Standard (v1.4).  
 
 Compatible with .NET Core, ASP.NET Core, and UWP.  

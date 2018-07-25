@@ -3,10 +3,29 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Configurations>Debug;Release;ubtest</Configurations>
+    <AssemblyName>DotNetStandardSpotifyWebApi</AssemblyName>
+    <Version>0.1.0</Version>
+    <Authors>0xNF</Authors>
+    <Company>Articulate Insights</Company>
+    <Product />
+    <Description>A .NET Standard 2.0 class library for interfacing with the Spotify Web Api.
+
+For more information see:
+https://github.com/0xNF/DotNetStandardSpotifyWebApi</Description>
+    <Copyright>2017-2018 Articulate Insights</Copyright>
+    <PackageLicenseUrl>https://github.com/0xNF/DotNetStandardSpotifyWebApi/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/0xNF/DotNetStandardSpotifyWebApi</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/0xNF/DotNetStandardSpotifyWebApi</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>Spotify</PackageTags>
+    <PackageReleaseNotes>This is the initial NuGet release. Please file bug reports on the github repo.</PackageReleaseNotes>
+    <SignAssembly>false</SignAssembly>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="NuGet.CommandLine" Version="4.7.0" />
   </ItemGroup>
 
 </Project>
