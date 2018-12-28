@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class Copyright : SpotifyObjectModel, ISpotifyObject {
@@ -48,14 +47,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         public Copyright(string text, string type) {
             this.Text = text;
             this.Type = type;
-        }
-
-        public JToken ToJson() {
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "text", this.Text },
-                { "type", this.Type }
-            };
-            return JObject.FromObject(keys);
         }
     }
 }

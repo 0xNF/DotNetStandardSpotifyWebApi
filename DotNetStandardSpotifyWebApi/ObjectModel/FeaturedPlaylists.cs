@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class FeaturedPlaylists : SpotifyObjectModel, ISpotifyObject{
@@ -33,14 +32,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if(pls != null) {
                 Playlists = new Paging<Playlist>(pls);
             }
-        }
-
-        public JToken ToJson() {
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "message", this.Message },
-                { "playlists", this.Playlists.ToJson() }
-            };
-            return JObject.FromObject(keys);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class CurrentlyPlayingContext : SpotifyObjectModel, ISpotifyObject {
@@ -84,21 +83,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 Item = new Track(trackObject);
             }
         }
-
-
-        public JToken ToJson() {
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "is_playing", this.Is_Playing },
-                { "progress_ms", this.Progress_Ms },
-                { "timestamp", this.Timestamp },
-                { "shuffle_state", this.Shuffle_State },
-                { "repeat_state", this.Repeat_State },
-                { "context",  this.Context.ToJson() },
-                { "item",  Item.ToFullJson() }
-            };
-            return JObject.FromObject(keys);
-        }
-
     }
 
 }

@@ -12,7 +12,6 @@ using System.Collections.Specialized;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using DotNetStandardSpotifyWebApi.Helpers;
-using System.Security.Cryptography;
 
 namespace DotNetStandardSpotifyWebApi.Authorization {
 
@@ -20,20 +19,16 @@ namespace DotNetStandardSpotifyWebApi.Authorization {
 
         public const int stateLength = 16;
         private const string SpotifyAPITokenUrl = "https://accounts.spotify.com/api/token";
-        private readonly static RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-        private const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        private static string GenerateRandomString(int length) {
-            char[] cs = new char[length];
+        
+        public static string GenerateRandomString(int length) {
+            Random _random = new Random();
+            string text = "";
+            string possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             for (int i = 0; i < length; i++) {
-                byte[] bs = new byte[4];
-                rng.GetNonZeroBytes(bs);
-                int ord = BitConverter.ToInt32(bs, 0);
-                ord = Math.Abs(ord);
-                ord %= chars.Length - 1;
-                cs[i] = chars[ord];
+                int r = _random.Next() % possible.Length;
+                text += possible[r];
             }
-            return String.Join("", cs);
+            return text;
         }
 
         public static string GetAuthState() {
@@ -63,9 +58,12 @@ namespace DotNetStandardSpotifyWebApi.Authorization {
         /// <param name="appRedirectUri">The redirect url of your Spotify App</param>
         /// <param name="scopes">List of scopes your app requires access to</param>
         /// <returns></returns>
-        public static AuthorizationInProgress GetAuthStateAndRedirect(string clientId, string appRedirectUri, IEnumerable<SpotifyScopeEnum> scopes) {
+        public static AuthorizationInProgress GetAuthStateAndRedirect(string clientId, string appRedirectUri, List<SpotifyScopeEnum> scopes) {
+            string SpotifyAuthRequestUrl = "https://accounts.spotify.com/authorize";
+            string stateValue = GetAuthState();
             string scopeString = string.Join(",",scopes.Select(x => x.Name));
-            return GetAuthStateAndRedirect(clientId, appRedirectUri, scopeString);
+            string redirect = $"{SpotifyAuthRequestUrl}?response_type=code&client_id={clientId}&scope={scopeString}&redirect_uri={appRedirectUri}&state={stateValue}";
+            return new AuthorizationInProgress(stateValue, redirect);
         }
 
         /// <summary>
@@ -77,8 +75,8 @@ namespace DotNetStandardSpotifyWebApi.Authorization {
         /// <param name="clientSecret"></param>
         /// <param name="redirectUri"></param>
         /// <returns></returns>
-        public static async Task<OAuthCredentials> GetSpotifyTokenCredentials(string code, string clientId, string clientSecret, string redirectUri){
-            string postBody = $"code={code}&redirect_uri={redirectUri}&grant_type=authorization_code";
+        public static async Task<OAuthCredentials> GetSpotifyTokenCredentials(string OAuthToken, string clientId, string clientSecret, string redirectUri){
+            string postBody = $"code={OAuthToken}&redirect_uri={redirectUri}&grant_type=authorization_code";
             return await GetSpotifyCredentials(postBody, clientId, clientSecret);        
         }
 

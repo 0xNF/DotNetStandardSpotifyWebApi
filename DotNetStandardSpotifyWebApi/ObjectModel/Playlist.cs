@@ -13,7 +13,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
     /// https://developer.spotify.com/web-api/object-model/#playlist-object-full
     /// https://developer.spotify.com/web-api/object-model/#playlist-object-simplified
     /// </summary>
-    public class Playlist : SpotifyObjectModel, ISpotifyObject, ISimpleSpotifyObject, IFullSpotifyObject {
+    public class Playlist : SpotifyObjectModel, ISpotifyObject {
 
         /// <summary>
         /// true if the owner allows other users to modify the playlist. 
@@ -156,26 +156,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         }
 
         /// <summary>
-        /// Fields Constructor
-        /// </summary>
-        public Playlist(string playlistId, string playlistName, string description, User owner, Followers followers, string snapshotId,  bool isPublic, bool isCollaborative, string href, string uri, Dictionary<string, string> externalUrls, IEnumerable<Image> images, Paging<PlaylistTrack> tracks) {
-            this.Collaborative = isCollaborative;
-            this.Description = description;
-            this.External_Urls = externalUrls;
-            this.Followers = followers;
-            this.Href = href;
-            this.Id = playlistId;
-            this.Images = images.ToArray();
-            this.Name = playlistName;
-            this.Owner = owner;
-            this.Public = isPublic;
-            this.Snapshot_Id = snapshotId;
-            this.Total = tracks?.Total ?? 0;
-            this.Uri = uri;
-            this.Tracks = tracks;
-        }
-
-        /// <summary>
         /// Error constructor
         /// </summary>
         /// <param name="wasError"></param>
@@ -190,43 +170,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// </summary>
         public Playlist() {
 
-        }
-
-        public JObject ToSimpleJson() {
-            JArray jimages = new JArray();
-            foreach(Image i in this.Images) {
-                jimages.Add(i.ToJson());
-            }
-
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "collaborative", this.Collaborative },
-                { "external_urls", JObject.FromObject(this.External_Urls) },
-                { "href", this.Href },
-                { "id", this.Id },
-                { "images", jimages },
-                { "name", this.Name },
-                { "owner", this.Owner.ToPublicJson() },
-                { "public", this.Public },
-                { "snapshot_id", this.Snapshot_Id },
-                { "tracks", new Followers(this.Href+"/tracks", this.Tracks.Total).ToJson() }, // Because a Followers object is structurally identical to this simple track href object
-                { "type", this.Type },
-                { "uri", this.Uri }
-            };
-            return JObject.FromObject(keys);
-        }
-
-        public JObject ToFullJson() {
-            JObject simple = this.ToSimpleJson();
-            simple.Add("description", this.Description);
-            simple.Add("followers", this.Followers.ToJson());
-            simple.Remove("tracks");
-            simple.Add("tracks", this.Tracks.ToJson());
-
-            return simple;
-        }
-
-        public JToken ToJson() {
-            return this.ToFullJson();
         }
 
     }

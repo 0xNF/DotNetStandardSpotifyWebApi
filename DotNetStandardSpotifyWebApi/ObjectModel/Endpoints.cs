@@ -17,11 +17,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class WebResult<T> {
-
-        /// <summary>
-        /// The URL of the request this WebRequest was sent for
-        /// </summary>
-        public string RequestUrl { get; }
         /// <summary>
         /// Whether this request to Spotify succeeded or not.
         /// If true, then Item will be set with the corresponding T type.
@@ -101,17 +96,14 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// </summary>
         public bool IsServiceUnavailable => this.ResponseCode == 503;
 
-        public WebResult(string url, bool successful, int responseCode, string resposneMessage, System.Net.Http.Headers.EntityTagHeaderValue etag, T item) {
-            this.RequestUrl = url;
+        public WebResult(bool successful, int responseCode, string resposneMessage, System.Net.Http.Headers.EntityTagHeaderValue etag, T item) {
             this.Succeeded = successful;
             this.ResponseCode = responseCode;
             this.ResponseMessage = ResponseMessage;
             this.ETag = etag;
             this.Item = item;
         }
-
-        public WebResult(string url, bool wasError, HttpStatusCode responseCode, string resposneMessage, System.Net.Http.Headers.EntityTagHeaderValue etag, T item) {
-            this.RequestUrl = url;
+        public WebResult(bool wasError, HttpStatusCode responseCode, string resposneMessage, System.Net.Http.Headers.EntityTagHeaderValue etag, T item) {
             this.Succeeded = wasError;
             this.ResponseCode = (int)responseCode;
             this.ResponseMessage = ResponseMessage;
@@ -601,7 +593,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             HttpRequestMessage message = SetupRequest(endpoint, accessToken, HttpMethod.Delete);
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, $"successfully unfollowed playlist {playlist_id}", response.Headers.ETag, true);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, $"successfully unfollowed playlist {playlist_id}", response.Headers.ETag, true);
             }
             else if (response.StatusCode == HttpStatusCode.BadRequest) {
                 JObject jobj = JObject.Parse(response.Content.ToString());
@@ -613,7 +605,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             else if ((int)response.StatusCode == 429) {
                 throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
             }
-            return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
+            return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
         }
 
         /// <summary>
@@ -654,10 +646,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(putObject.ToString());
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, true);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, true);
             }
             else {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 
@@ -704,10 +696,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(putObject.ToString());
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, $"successfully removed {idArr.Length} tracks from users library", response.Headers.ETag, true);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, $"successfully removed {idArr.Length} tracks from users library", response.Headers.ETag, true);
             }
             else {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 
@@ -748,10 +740,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(putObject.ToString());
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, $"successfully saved {idarr.Length} albums", response.Headers.ETag, true);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, $"successfully saved {idarr.Length} albums", response.Headers.ETag, true);
             }
             else {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 
@@ -794,10 +786,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(putObject.ToString());
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, $"successfully removed {idArr.Length} albums from users library", response.Headers.ETag, true);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, $"successfully removed {idArr.Length} albums from users library", response.Headers.ETag, true);
             }
             else {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
+                return new WebResult<bool>(response.IsSuccessStatusCode, (int)response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 
@@ -1182,7 +1174,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if (response.IsSuccessStatusCode) {
                 string content = await response.Content.ReadAsStringAsync();
                 JObject token = JObject.Parse(content);
-                return new WebResult<Playlist>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, new Playlist(token));
+                return new WebResult<Playlist>(response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, new Playlist(token));
             }
             else if (response.StatusCode == HttpStatusCode.BadRequest) {
                 JObject jobj = JObject.Parse(response.Content.ToString());
@@ -1194,7 +1186,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             else if ((int)response.StatusCode == 429) {
                 throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
             }
-            return new WebResult<Playlist>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, null);
+            return new WebResult<Playlist>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, null);
         }
 
         /// <summary>
@@ -1226,7 +1218,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 putItems.Add("collaborative", isCollaborative);
             }
             if (!putItems.Any()) {
-                return new WebResult<bool>(endpoint, true, 200, "no fields to modifiy", null, true);
+                return new WebResult<bool>(true, 200, "no fields to modifiy", null, true);
             }
 
             JObject putObject = JObject.FromObject(putItems);
@@ -1237,7 +1229,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(putObject.ToString());
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode,"Succesfully modified playlist", response.Headers.ETag, true);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode,"Succesfully modified playlist", response.Headers.ETag, true);
             }
             else if (response.StatusCode == HttpStatusCode.BadRequest) {
                 JObject jobj = JObject.Parse(response.Content.ToString());
@@ -1249,7 +1241,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             else if ((int)response.StatusCode == 429) {
                 throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
             }
-            return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
+            return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
         }
 
         /// <summary>
@@ -1275,10 +1267,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             message.Content = new StringContent(b64_imageData);
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode,"Succesfully uploaded image", response.Headers.ETag, true);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode,"Succesfully uploaded image", response.Headers.ETag, true);
             }
             else {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 
@@ -1321,10 +1313,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
                 string content = await response.Content.ReadAsStringAsync();
-                return new WebResult<string>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, content, response.Headers.ETag, content);
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, content, response.Headers.ETag, content);
             }
             else {
-                return new WebResult<string>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
             }
         }
 
@@ -1355,10 +1347,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if (response.IsSuccessStatusCode) {
                 string content = await response.Content.ReadAsStringAsync();
                 JObject jobj = JObject.Parse(content);
-                return new WebResult<string>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, jobj.Value<string>("snapshot_id"));
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, jobj.Value<string>("snapshot_id"));
             }
             else {
-                return new WebResult<string>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
             }
 
         }
@@ -1421,10 +1413,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if (response.IsSuccessStatusCode) {
                 string content = await response.Content.ReadAsStringAsync();
                 JObject jobj = JObject.Parse(content);
-                return new WebResult<string>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, jobj.Value<string>("snapshot_id"));
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, jobj.Value<string>("snapshot_id"));
             }
             else {
-                return new WebResult<string>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
             }
 
         }
@@ -1458,10 +1450,10 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             if (response.IsSuccessStatusCode) {
                 string content = await response.Content.ReadAsStringAsync();
                 JObject jobj = JObject.Parse(content);
-                return new WebResult<string>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, jobj.Value<string>("snapshot_id"));
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, "", response.Headers.ETag, jobj.Value<string>("snapshot_id"));
             }
             else {
-                return new WebResult<string>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
+                return new WebResult<string>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, "");
             }
         }
 

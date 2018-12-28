@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class AudioFeatures : SpotifyObjectModel, ISpotifyObject {
@@ -239,29 +238,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             this.Valence = valence;
         }
 
-
-        public JToken ToJson() {
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "acousticness", this.Acousticness },
-                { "analysis_url", this.Analysis_Url },
-                { "danceability", this.Danceability },
-                { "duration_ms", this.Duration_MS },
-                { "energy", this.Energy },
-                { "id", this.Id },
-                { "instrumentalness", this.Instrumentalness},
-                { "key", this.Key},
-                { "liveness", this.Liveness},
-                { "loudness", this.Loudness },
-                { "mode", this.Mode },
-                { "speechiness", this.Speechiness},
-                { "tempo", this.Tempo },
-                { "time_signature", this.Time_Signature},
-                { "track_href", this.Track_Href },
-                { "uri", this.Uri },
-                { "valence", this.Valence },
-            };
-            return JObject.FromObject(keys);
-        }
 
     }
 

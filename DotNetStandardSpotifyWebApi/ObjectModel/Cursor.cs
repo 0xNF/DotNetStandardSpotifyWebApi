@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class Cursor : SpotifyObjectModel, ISpotifyObject {
@@ -33,13 +32,5 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         public Cursor(JToken token) {
             After = token.Value<string>("after") ?? string.Empty;
         }
-
-        public JToken ToJson() {
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "after", this.After }
-            };
-            return JObject.FromObject(keys);
-        }
-
     }
 }

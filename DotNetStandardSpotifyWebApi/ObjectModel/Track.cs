@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
-    public class Track : SpotifyObjectModel, ISpotifyObject, ISimpleSpotifyObject, IFullSpotifyObject {
-
-        private readonly bool IsTrackRelinkingApplied = false;
+    public class Track : SpotifyObjectModel, ISpotifyObject {
 
         /// <summary>
         /// The album on which the track appears. 
@@ -64,14 +62,13 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// Part of the response when Track Relinking is applied.
         /// If true, the track is playable in the given market. Otherwise false.
         /// </summary>
-        public bool Is_Playable { get; } = true;
+        public bool Is_Playable { get; } = false;
 
         /// <summary>
         /// Part of the response when Track Relinking is applied, and the requested track has been replaced with different track.
         /// The track in the linked_from object contains information about the originally requested track.
         /// </summary>
         public TrackLink Linked_From { get; } = new TrackLink(true, "Default, not yet populated");
-
 
         /// <summary>
         /// The name of the track.
@@ -87,13 +84,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         ///  Note that the popularity value may lag actual popularity by a few days: the value is not updated in real time.
         /// </summary>
         public int Popularity { get; } = 0;
-
-        /// <summary>
-        /// Part of the response when Track Relinking is applied, the original track is not available in the given market, and Spotify did not have any tracks to relink it with. 
-        /// The track response will still contain metadata for the original track, and a restrictions object containing the reason why the track is not available:
-        /// "restrictions" : {"reason" : "market"}
-        /// </summary>
-        public Restriction Restrictions { get; }
 
         /// <summary>
         /// A link to a 30 second preview (MP3 format) of the track. Empty if not available.
@@ -127,7 +117,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             Duration_Ms = token.Value<long?>("duration_ms") ?? 0;
             Explicit = token.Value<bool?>("explicit") ?? false;
             Href = token.Value<string>("href") ?? string.Empty;
-            Is_Playable = token.Value<bool?>("is_playable") ?? true;
+            Is_Playable = token.Value<bool?>("is_playable") ?? false;
             Id = token.Value<string>("id") ?? string.Empty;
             Name = token.Value<string>("name") ?? string.Empty;
             Popularity = token.Value<int?>("popularity") ?? 0;
@@ -180,13 +170,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             }
 
 
-            // Restrictions
-            JToken restrictions = token.Value<JToken>("restrictions");
-            if (restrictions != null) {
-                Restrictions = new Restriction(restrictions);
-            }
-
-
         }
 
         /// <summary>
@@ -197,26 +180,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         }
 
         /// <summary>
-        /// Fields constructor
-        /// </summary>
-        public Track(string trackId, Artist[] artists, string[] availableMarkets, bool isPlayable, int discNumber, bool isExplicit, Dictionary<string, string> externalIds, string href, string name, string previewUrl, int trackNumber, string uri, int popularity) {
-            this.Id = trackId;
-            this.Artists = artists;
-            this.Available_Markets = availableMarkets;
-            this.Disc_Number = discNumber;
-            this.Explicit = isExplicit;
-            this.External_Ids = externalIds;
-            this.Href = href;
-            this.Name = name;
-            this.Preview_Url = previewUrl;
-            this.Track_Number = trackNumber;
-            this.Uri = uri;
-            this.Popularity = popularity;
-            this.Restrictions = null;
-            this.Is_Playable = isPlayable;
-        }
-
-        /// <summary>
         /// Error constructor
         /// </summary>
         /// <param name="wasError"></param>
@@ -224,47 +187,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         public Track(bool wasError, string errorMessage) {
             this.WasError = wasError;
             this.ErrorMessage = errorMessage;
-        }
-
-        public JObject ToSimpleJson() {
-
-            JArray jartists = new JArray();
-            foreach(Artist a in this.Artists) {
-                jartists.Add(a.ToSimpleJson());
-            }
-
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "artists", jartists },
-                { "available_markets", JArray.FromObject(this.Available_Markets) },
-                { "disc_number", this.Disc_Number },
-                { "duration_ms", this.Duration_Ms },
-                { "explicit", this.Explicit },
-                { "external_urls", JObject.FromObject(this.External_Urls) },
-                { "href", this.Href },
-                { "id", this.Id },
-                { "name", this.Name },
-                { "preview_url", this.Preview_Url },
-                { "track_number", this.Track_Number },
-                { "type", this.Type },
-                { "uri", this.Uri }
-            };
-            if (IsTrackRelinkingApplied) {
-                keys.Add("is_playable", this.Is_Playable);
-                keys.Add("linked_from", this.Linked_From.ToJson());
-                keys.Add("restrictions", this.Restrictions.ToJson());
-            }
-            return JObject.FromObject(keys);
-        }
-
-        public JObject ToFullJson() {
-            JObject simple = this.ToSimpleJson();
-            simple.Add("popularity", this.Popularity);
-            simple.Add("album", this.Album.ToSimpleJson());
-            return simple;
-        }
-
-        public JToken ToJson() {
-            return this.ToFullJson();
         }
 
     }

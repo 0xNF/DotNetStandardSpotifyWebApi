@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
     public class PlayHistory : SpotifyObjectModel, ISpotifyObject {
@@ -63,15 +62,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
             Played_At = played_at;
             Context = context;
             Track = track;
-        }
-
-        public JToken ToJson() {
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "track", this.Track.ToSimpleJson() },
-                { "played_at", this.Played_At },
-                { "context", this.Context.ToJson() }
-            };
-            return JObject.FromObject(keys);
         }
     }
 

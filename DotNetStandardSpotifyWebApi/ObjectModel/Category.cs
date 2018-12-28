@@ -63,20 +63,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         public Category() {
 
         }
-
-        public JToken ToJson() {
-            JArray jimages = new JArray();
-            foreach(Image i in this.Icons) {
-                jimages.Add(i.ToJson());
-            }
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "href", this.Href },
-                { "id", this.Id },
-                { "name", this.Name },
-                { "icons", jimages }
-            };
-            return JObject.FromObject(keys);
-        }
     }
 
 }

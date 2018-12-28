@@ -183,10 +183,10 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
                     bool contains = jobj.Value<bool>();
                     lst.Add(contains);
                 }
-                return new WebResult<IReadOnlyList<bool>>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, lst);
+                return new WebResult<IReadOnlyList<bool>>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, lst);
             }
             else {
-                return new WebResult<IReadOnlyList<bool>>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag,  null);
+                return new WebResult<IReadOnlyList<bool>>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag,  null);
             }
 
         }
@@ -204,7 +204,7 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
                     token = token.Value<JToken>(key);
                 }
                 T item = (T)generator(token);
-                return new WebResult<T>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, item);
+                return new WebResult<T>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, item);
             }
             else if (response.StatusCode == HttpStatusCode.BadRequest) {
                 JObject jobj = JObject.Parse(response.Content.ToString());
@@ -216,7 +216,7 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
             else if ((int)response.StatusCode == 429) {
                 throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
             }
-            return new WebResult<T>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag,  default(T));
+            return new WebResult<T>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag,  default(T));
         }
         internal static async Task<WebResult<IEnumerable<T>>> DoSeveralHttp<T>(string endpoint, string type, string accessToken, EntityTagHeaderValue etag = null) {
             Func<JToken, ISpotifyObject> generator = CreateSpotifyObjectGenerator(typeof(T));
@@ -239,7 +239,7 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
                         lst.Add(default(T));
                     }
                 }
-                return new WebResult<IEnumerable<T>>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, lst);
+                return new WebResult<IEnumerable<T>>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, lst);
 
             }
             else if (response.StatusCode == HttpStatusCode.BadRequest) {
@@ -252,7 +252,7 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
             else if ((int)response.StatusCode == 429) {
                 throw new RateLimitException(response.Headers.RetryAfter.Delta.Value.TotalSeconds);
             }
-            return new WebResult<IEnumerable<T>>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, null);
+            return new WebResult<IEnumerable<T>>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, null);
         }
         //TODO this is nasty
         internal static string EncodeRequestParams(Dictionary<string, object> reqParams) {
@@ -307,10 +307,10 @@ namespace DotNetStandardSpotifyWebApi.Helpers {
             }
             HttpResponseMessage response = await Client.SendAsync(message);
             if (response.IsSuccessStatusCode) {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, true);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, true);
             }
             else {
-                return new WebResult<bool>(message.RequestUri.AbsoluteUri, response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
+                return new WebResult<bool>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase, response.Headers.ETag, false);
             }
         }
 

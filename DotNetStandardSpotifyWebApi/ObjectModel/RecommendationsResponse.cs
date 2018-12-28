@@ -61,21 +61,5 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
                 this.Tracks = tracks;
             }
         }
-
-        public JToken ToJson() {
-            JArray jseeds = new JArray();
-            foreach(RecommendationSeed seed in this.Seeds) {
-                jseeds.Add(seed.ToJson());
-            }
-            JArray jtracks = new JArray();
-            foreach(Track t in this.Tracks) {
-                jtracks.Add(t.ToFullJson());
-            }
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "seeds", jseeds },
-                { "track", jtracks }
-            };
-            return JObject.FromObject(keys);
-        }
     }
 }

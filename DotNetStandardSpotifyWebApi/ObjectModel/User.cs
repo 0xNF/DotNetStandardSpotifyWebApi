@@ -140,44 +140,5 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
 
         }
 
-        public JObject ToPublicJson() {
-            JArray jimages = new JArray();
-            foreach(Image i in this.Images) {
-                jimages.Add(i.ToJson());
-            }
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "display_name", this.DisplayName },
-                { "external_urls", JObject.FromObject(this.External_Urls) },
-                { "followers", this.Followers.ToJson() },
-                { "href", this.Href },
-                { "id", this.Id },
-                { "images", jimages },
-                { "type", this.Type },
-                { "uri", this.Uri }
-            };
-
-            return JObject.FromObject(keys);
-        }
-
-        public JObject ToPrivateJson() {
-            JObject pub = this.ToPublicJson();
-            if (this.Birthdate != null) {
-                pub.Add("birthdate", this.Birthdate);
-            }
-            if(this.Country != null) {
-                pub.Add("country", this.Country);
-            }
-            if(this.Email != null) {
-                pub.Add("email", this.Email);
-            }
-            if(this.Product != null) {
-                pub.Add("product", this.Product);
-            }
-            return pub;
-        }
-
-        public JToken ToJson() {
-            return ToPrivateJson();
-        }
     }
 }

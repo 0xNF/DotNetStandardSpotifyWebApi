@@ -2,9 +2,7 @@
 using Newtonsoft.Json.Linq;
 
 namespace DotNetStandardSpotifyWebApi.ObjectModel {
-    public class Artist : SpotifyObjectModel, ISpotifyObject, ISimpleSpotifyObject, IFullSpotifyObject {
-
-        private readonly bool IsTrackRelinkingApplied = false;
+    public class Artist : SpotifyObjectModel, ISpotifyObject {
 
         /// <summary>
         /// Known external URLs for this artist.
@@ -57,7 +55,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// The Spotify URI for the artist.
         /// </summary>
         public string Uri { get; } = string.Empty;
-
         
 
 
@@ -111,30 +108,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         }
 
         /// <summary>
-        /// Fields constructor
-        /// </summary>
-        /// <param name="artistId"></param>
-        /// <param name="artistName"></param>
-        /// <param name="externalUrls"></param>
-        /// <param name="followers"></param>
-        /// <param name="genres"></param>
-        /// <param name="href"></param>
-        /// <param name="images"></param>
-        /// <param name="popularity"></param>
-        /// <param name="uri"></param>
-        public Artist(string artistId, string artistName, Dictionary<string, string> externalUrls, Followers followers, string[] genres, string href, Image[] images, int popularity, string uri) {
-            this.Id = artistId;
-            this.Name = artistName;
-            this.External_Urls = externalUrls;
-            this.Followers = followers;
-            this.Genres = genres;
-            this.Href = href;
-            this.Images = images;
-            this.Popularity = popularity;
-            this.Uri = uri;
-        }
-
-        /// <summary>
         /// Empty Constructor
         /// </summary>
         public Artist() {
@@ -149,37 +122,6 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         public Artist(bool wasError, string errorMessage) {
             this.WasError = wasError;
             this.ErrorMessage = errorMessage;
-        }
-
-        public JObject ToSimpleJson() {
-            Dictionary<string, object> keys = new Dictionary<string, object>() {
-                { "external_urls",  JObject.FromObject(this.External_Urls) },
-                { "href", this.Href },
-                { "id", this.Id },
-                { "name", this.Name },
-                { "type", this.Type },
-                { "uri", this.Uri }
-            };
-            return JObject.FromObject(keys);
-        }
-
-        public JObject ToFullJson() {
-            JArray jimages = new JArray();
-            foreach (Image i in this.Images) {
-                jimages.Add(i.ToJson());
-            }
-
-            JObject simple = this.ToSimpleJson();
-            simple.Add("followers", this.Followers.ToJson());
-            simple.Add("genres", JArray.FromObject(this.Genres));
-            simple.Add("images", jimages);
-            simple.Add("popularity", this.Popularity);
-
-            return simple;
-        }
-
-        public JToken ToJson() {
-            return ToFullJson();
         }
     }
 }
