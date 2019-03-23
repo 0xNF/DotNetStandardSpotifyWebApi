@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/0xNF/DotNetStandardSpotifyWebApi/blob/master/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/0xNF/DotNetStandardSpotifyWebApi</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Initial release of this library on NuGet</releaseNotes>
+    <copyright>Copyright 2017,2018,2019</copyright>
+    <tags>Spotify</tags>
+      <packageTypes>
+        <packageType name="Dependency" />
+    </packageTypes>
+  </metadata>
+</package>

@@ -12,39 +12,39 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// Information about the followers of the artist. 
         /// </summary>
-        public Followers Followers { get; } = new Followers(true, "empty followers");
+        public Followers Followers { get; set;  } = new Followers(true, "empty followers");
 
         /// <summary>
         /// A list of the genres the artist is associated with. For example: "Prog Rock", "Post-Grunge". (If not yet classified, the array is empty.) 
         /// </summary>
-        public string[] Genres { get; } = new string[0];
+        public string[] Genres { get; set;  } = new string[0];
 
         /// <summary>
         /// A link to the Web API endpoint providing full details of the artist.
         /// </summary>
-        public string Href { get; } = string.Empty;
+        public string Href { get; set;  } = string.Empty;
 
         /// <summary>
         /// The Spotify ID for the artist. 
         /// </summary>
-        public string Id { get; } = string.Empty;
+        public string Id { get; set; } = string.Empty;
 
         /// <summary>
         /// Images of the artist in various sizes, widest first.
         /// </summary>
-        public Image[] Images { get; } = new Image[0];
+        public Image[] Images { get; set;  } = new Image[0];
 
         /// <summary>
         /// The name of the artist 
         /// </summary>
-        public string Name { get; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// The popularity of the artist.
         /// The value will be between 0 and 100, with 100 being the most popular. 
         /// The artist's popularity is calculated from the popularity of all the artist's tracks.
         /// </summary>
-        public int Popularity { get; } = 0;
+        public int Popularity { get; set;  } = 0;
 
         /// <summary>
         /// The object type: "artist"
@@ -54,8 +54,7 @@ namespace DotNetStandardSpotifyWebApi.ObjectModel {
         /// <summary>
         /// The Spotify URI for the artist.
         /// </summary>
-        public string Uri { get; } = string.Empty;
-        
+        public string Uri { get; set; } = string.Empty;
 
 
         /// <summary>
